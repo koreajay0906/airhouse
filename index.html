@@ -354,7 +354,7 @@
       <div class="step-num">Question 02</div>
       <h2 class="step-title">어떻게 불러드릴까요?</h2>
       <p class="step-desc">실명이 아니어도 좋아요. 닉네임이나 별명도 환영해요.</p>
-      <div class="input-wrap"><input type="text" class="input" id="nickname" maxlength="20" placeholder="예: 민지, MJ, 페스티벌러버" oninput="checkInput('nickname')" oncompositionstart="composing=true" oncompositionend="composing=false; checkInput('nickname')"></div>
+      <div class="input-wrap"><input type="text" class="input" id="nickname" placeholder="예: 민지, MJ, 페스티벌러버" oninput="enforceMaxLength(this, 20); checkInput('nickname')" oncompositionend="enforceMaxLength(this, 20); checkInput('nickname')"></div>
       <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
     </div>
 
@@ -403,7 +403,7 @@
       <div class="step-num">Question 06</div>
       <h2 class="step-title">어디서 출발하세요?</h2>
       <p class="step-desc">같은 지역끼리 묶어드릴 수도 있어요.</p>
-      <div class="input-wrap"><input type="text" class="input" id="region" placeholder="예: 서울 강남, 부산 해운대, 대구" oninput="checkInput('region')" oncompositionstart="composing=true" oncompositionend="composing=false; checkInput('region')"></div>
+      <div class="input-wrap"><input type="text" class="input" id="region" placeholder="예: 서울 강남, 부산 해운대, 대구" oninput="checkInput('region')" oncompositionend="checkInput('region')"></div>
       <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
     </div>
 
@@ -503,7 +503,7 @@
       <h2 class="step-title">짧게 자기소개 해주세요</h2>
       <p class="step-desc">좋아하는 아티스트, 취미 등 뭐든 좋아요.</p>
       <div class="input-wrap">
-        <textarea class="textarea" id="intro" maxlength="100" placeholder="예시 · Peggy Gou 좋아해요, 사진 찍는 거 좋아하는 편" oninput="checkInput('intro'); updateCharCount();" oncompositionstart="composing=true" oncompositionend="composing=false; checkInput('intro'); updateCharCount();"></textarea>
+        <textarea class="textarea" id="intro" placeholder="예시 · Peggy Gou 좋아해요, 사진 찍는 거 좋아하는 편" oninput="enforceMaxLength(this, 100); checkInput('intro'); updateCharCount();" oncompositionend="enforceMaxLength(this, 100); checkInput('intro'); updateCharCount();"></textarea>
         <span class="char-count"><span id="charCount">0</span> / 100</span>
       </div>
       <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
@@ -565,7 +565,7 @@
       </div>
     </div>
 
-    <div style="margin-bottom: 32px;"><div class="step-num">Nickname</div><input type="text" class="input" id="editNickname" maxlength="20" style="margin-top: 12px;"></div>
+    <div style="margin-bottom: 32px;"><div class="step-num">Nickname</div><input type="text" class="input" id="editNickname" style="margin-top: 12px;" oninput="enforceMaxLength(this, 20)" oncompositionend="enforceMaxLength(this, 20)"></div>
 
     <div style="margin-bottom: 32px;">
       <div class="step-num">Gender</div>
@@ -681,7 +681,7 @@
     <div style="margin-bottom: 32px;">
       <div class="step-num">Self Introduction</div>
       <div class="input-wrap" style="margin-top: 12px;">
-        <textarea class="textarea" id="editIntro" maxlength="100" oninput="updateEditCharCount()"></textarea>
+        <textarea class="textarea" id="editIntro" oninput="enforceMaxLength(this, 100); updateEditCharCount()" oncompositionend="enforceMaxLength(this, 100); updateEditCharCount()"></textarea>
         <span class="char-count"><span id="editCharCount">0</span> / 100</span>
       </div>
     </div>
@@ -733,7 +733,7 @@
     <div class="modal-eyebrow">Send Companion Request</div>
     <h3 class="modal-title" id="requestModalTitle">동행 요청 보내기</h3>
     <p style="font-size: 14px; color: var(--ink-soft); margin-bottom: 16px; line-height: 1.7;">메시지를 함께 보내면 수락 확률이 높아져요. (선택)</p>
-    <textarea class="textarea" id="requestMessage" maxlength="200" placeholder="예: 안녕하세요! 23일에 같이 가실 분 찾고 있었어요." style="min-height: 120px;"></textarea>
+    <textarea class="textarea" id="requestMessage" placeholder="예: 안녕하세요! 23일에 같이 가실 분 찾고 있었어요." style="min-height: 120px;" oninput="enforceMaxLength(this, 200)" oncompositionend="enforceMaxLength(this, 200)"></textarea>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeRequestModal()" style="flex: 1;">취소</button>
       <button class="btn btn-primary" onclick="confirmSendRequest()" style="flex: 1;">요청 보내기 →</button>
@@ -1127,9 +1127,15 @@
   
   function checkInput(key) {
     const val = document.getElementById(key).value;
-    // 한글 조합 중에는 값을 그대로 두고 버튼 활성화만 처리
     if (val.trim()) { formData[key] = val.trim(); enableNext(); }
     else { delete formData[key]; disableNext(); }
+  }
+  
+  // 모바일 한글 입력 호환을 위해 maxlength 대신 JS로 처리
+  function enforceMaxLength(el, maxLen) {
+    if (el.value.length > maxLen) {
+      el.value = el.value.slice(0, maxLen);
+    }
   }
   
   async function checkPhone() {
