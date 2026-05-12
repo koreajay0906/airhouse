@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>디에어하우스 동행 매칭 · 핸디버스</title>
+<meta name="description" content="디에어하우스 페스티벌, 함께할 동행을 찾아보세요.">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Noto+Serif+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #f5f1e8; --bg-soft: #ebe5d6; --paper: #fbf8f1;
+    --ink: #1a1a17; --ink-soft: #4a463d; --ink-mute: #8a8578;
+    --line: #d4cdb8; --line-soft: #e5dfce;
+    --accent: #3d4a3a; --accent-soft: #6b7862; --moss: #5a6b4a;
+    --earth: #8b6f47; --sand: #c4b896;
+    --error: #a04545; --success-c: #5a7a4a; --warning: #b8843a;
+    --serif-ko: 'Noto Serif KR', serif;
+    --serif-en: 'Cormorant Garamond', serif;
+    --sans: 'Pretendard', -apple-system, sans-serif;
+  }
+  html, body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.6; min-height: 100vh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: radial-gradient(circle at 20% 80%, rgba(139,111,71,0.04) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(90,107,74,0.04) 0%, transparent 50%); pointer-events: none; z-index: 0; }
+  .topbar { position: relative; z-index: 10; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); background: var(--bg); }
+  .brand { font-family: var(--serif-en); font-size: 17px; font-weight: 500; letter-spacing: 0.08em; color: var(--ink); cursor: pointer; }
+  .brand .dot { display: inline-block; width: 5px; height: 5px; background: var(--moss); border-radius: 50%; margin: 0 10px; vertical-align: middle; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; font-family: var(--serif-en); font-size: 13px; color: var(--ink-mute); letter-spacing: 0.05em; }
+  .user-chip { display: none; align-items: center; gap: 8px; padding: 6px 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 20px; cursor: pointer; transition: all 0.2s; }
+  .user-chip.active { display: flex; }
+  .user-chip:hover { border-color: var(--accent-soft); }
+  .user-chip-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; overflow: hidden; }
+  .user-chip-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .user-chip-name { font-family: var(--sans); font-size: 13px; color: var(--ink); letter-spacing: 0; }
+  .page { display: none; position: relative; z-index: 1; }
+  .page.active { display: block; }
+  .home-hero { padding: 100px 32px 60px; text-align: center; max-width: 800px; margin: 0 auto; }
+  .home-eyebrow { font-family: var(--serif-en); font-size: 14px; letter-spacing: 0.3em; color: var(--moss); text-transform: uppercase; margin-bottom: 32px; display: inline-block; position: relative; padding: 0 24px; }
+  .home-eyebrow::before, .home-eyebrow::after { content: ''; position: absolute; top: 50%; width: 12px; height: 1px; background: var(--moss); }
+  .home-eyebrow::before { left: 0; } .home-eyebrow::after { right: 0; }
+  .home-title { font-family: var(--serif-ko); font-size: clamp(40px, 6.5vw, 64px); font-weight: 400; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 32px; }
+  .home-title .em { font-family: var(--serif-en); font-style: italic; color: var(--moss); }
+  .home-desc { font-size: 16px; line-height: 1.9; color: var(--ink-soft); max-width: 520px; margin: 0 auto 56px; font-weight: 300; }
+  .home-cta { display: flex; gap: 12px; max-width: 440px; margin: 0 auto; }
+  .festival-info { max-width: 800px; margin: 80px auto 0; padding: 0 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .festival-info-item { background: var(--bg); padding: 24px 16px; text-align: center; }
+  .festival-info-label { font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.25em; color: var(--ink-mute); text-transform: uppercase; margin-bottom: 8px; }
+  .festival-info-value { font-family: var(--serif-ko); font-size: 15px; font-weight: 500; }
+  .form-section { max-width: 640px; margin: 0 auto; padding: 60px 32px 120px; }
+  .back-link { background: none; border: none; color: var(--ink-mute); font-family: var(--serif-en); font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; padding: 0; margin-bottom: 40px; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s; }
+  .back-link:hover { color: var(--ink); }
+  .progress-wrap { margin-bottom: 48px; display: flex; align-items: center; gap: 16px; }
+  .progress { flex: 1; height: 1px; background: var(--line); position: relative; }
+  .progress-fill { position: absolute; inset: 0 auto 0 0; background: var(--moss); transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+  .progress-text { font-family: var(--serif-en); font-size: 13px; color: var(--ink-mute); letter-spacing: 0.1em; min-width: 50px; text-align: right; }
+  .step { display: none; animation: fadeIn 0.5s ease-out; }
+  .step.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .step-num { font-family: var(--serif-en); font-size: 12px; letter-spacing: 0.25em; color: var(--moss); text-transform: uppercase; margin-bottom: 16px; }
+  .step-title { font-family: var(--serif-ko); font-size: 28px; font-weight: 500; line-height: 1.35; margin-bottom: 12px; letter-spacing: -0.01em; }
+  .step-desc { font-size: 15px; color: var(--ink-soft); margin-bottom: 36px; line-height: 1.7; font-weight: 300; }
+  .step-desc .hint { display: inline-block; margin-left: 8px; font-size: 13px; color: var(--ink-mute); }
+  .options { display: grid; gap: 10px; }
+  .options.cols-2 { grid-template-columns: 1fr 1fr; }
+  .options.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .options.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .option { padding: 18px 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 2px; color: var(--ink); font-size: 15px; font-family: inherit; cursor: pointer; transition: all 0.25s ease; text-align: center; font-weight: 400; position: relative; }
+  .option.small { padding: 14px 12px; font-size: 14px; }
+  .option:hover { border-color: var(--accent-soft); background: var(--bg-soft); }
+  .option.selected { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+  .option.selected::after { content: ''; position: absolute; top: 10px; right: 10px; width: 6px; height: 6px; background: var(--sand); border-radius: 50%; }
+  .option-sub { display: block; font-family: var(--serif-en); font-size: 11px; color: var(--ink-mute); margin-top: 4px; letter-spacing: 0.05em; }
+  .option.selected .option-sub { color: var(--sand); }
+  .input-wrap { position: relative; }
+  .input, .textarea { width: 100%; padding: 16px 18px; background: var(--paper); border: 1px solid var(--line); border-radius: 2px; color: var(--ink); font-size: 15px; font-family: inherit; transition: all 0.2s; }
+  .input:focus, .textarea:focus { outline: none; border-color: var(--accent); }
+  .input::placeholder, .textarea::placeholder { color: var(--ink-mute); font-weight: 300; }
+  .textarea { resize: none; min-height: 110px; line-height: 1.7; }
+  .char-count { position: absolute; bottom: 10px; right: 14px; font-family: var(--serif-en); font-size: 11px; color: var(--ink-mute); letter-spacing: 0.05em; }
+  .error-msg { margin-top: 10px; font-size: 13px; color: var(--error); display: none; }
+  .error-msg.show { display: block; }
+  .photo-uploader { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .photo-preview { width: 160px; height: 160px; border-radius: 50%; background: var(--paper); border: 2px dashed var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; transition: all 0.2s; position: relative; }
+  .photo-preview:hover { border-color: var(--accent-soft); background: var(--bg-soft); }
+  .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-placeholder { text-align: center; color: var(--ink-mute); }
+  .photo-placeholder svg { width: 32px; height: 32px; stroke: var(--ink-mute); fill: none; stroke-width: 1.5; margin-bottom: 8px; }
+  .photo-placeholder-text { font-family: var(--serif-en); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; }
+  .photo-actions { display: flex; gap: 8px; }
+  .photo-btn { background: transparent; border: 1px solid var(--line); color: var(--ink-soft); padding: 8px 16px; font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
+  .photo-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .contacts-list { display: flex; flex-direction: column; gap: 10px; }
+  .contact-row { display: grid; grid-template-columns: 140px 1fr auto; gap: 8px; align-items: center; }
+  .contact-select { padding: 14px 14px; background: var(--paper); border: 1px solid var(--line); border-radius: 2px; color: var(--ink); font-size: 14px; font-family: inherit; cursor: pointer; }
+  .contact-select:focus { outline: none; border-color: var(--accent); }
+  .contact-remove { background: transparent; border: 1px solid var(--line); color: var(--ink-mute); width: 38px; height: 38px; border-radius: 2px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+  .contact-remove:hover { border-color: var(--error); color: var(--error); }
+  .add-contact-btn { background: transparent; border: 1px dashed var(--line); color: var(--ink-soft); padding: 12px; width: 100%; cursor: pointer; font-family: inherit; font-size: 13px; border-radius: 2px; transition: all 0.2s; margin-top: 6px; }
+  .add-contact-btn:hover { border-color: var(--accent-soft); color: var(--ink); }
+  .btn-row { display: flex; gap: 10px; margin-top: 36px; }
+  .btn { padding: 16px 28px; border: 1px solid var(--ink); border-radius: 2px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; font-family: inherit; letter-spacing: 0.05em; background: var(--ink); color: var(--paper); }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-primary { flex: 1; }
+  .btn-primary:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
+  .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  .btn-ghost:hover { border-color: var(--ink); background: var(--bg-soft); }
+  .btn-block { width: 100%; }
+  .btn-danger { background: transparent; color: var(--error); border-color: var(--error); }
+  .btn-danger:hover { background: var(--error); color: var(--paper); }
+  .success-page { min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 60px 24px; }
+  .success-inner { text-align: center; max-width: 480px; width: 100%; }
+  .success-mark { width: 80px; height: 80px; margin: 0 auto 32px; border: 1px solid var(--moss); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .success-mark svg { width: 30px; height: 30px; stroke: var(--moss); stroke-width: 1.5; fill: none; }
+  .success-title { font-family: var(--serif-ko); font-size: 32px; font-weight: 500; margin-bottom: 16px; }
+  .success-desc { font-size: 15px; color: var(--ink-soft); line-height: 1.8; margin-bottom: 40px; font-weight: 300; }
+  .auth-wrap { min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 60px 24px; }
+  .auth-card { background: var(--paper); border: 1px solid var(--line); padding: 48px 40px; max-width: 440px; width: 100%; border-radius: 2px; }
+  .auth-eyebrow { font-family: var(--serif-en); font-size: 12px; letter-spacing: 0.25em; color: var(--moss); text-transform: uppercase; margin-bottom: 12px; text-align: center; }
+  .auth-title { font-family: var(--serif-ko); font-size: 28px; text-align: center; font-weight: 500; margin-bottom: 8px; }
+  .auth-sub { font-size: 14px; color: var(--ink-soft); text-align: center; margin-bottom: 32px; font-weight: 300; }
+  .auth-form-group { margin-bottom: 16px; }
+  .auth-form-group label { display: block; font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; margin-bottom: 8px; }
+  .feed-wrap { max-width: 1100px; margin: 0 auto; padding: 32px; }
+  .feed-tabs { display: flex; border-bottom: 1px solid var(--line); margin-bottom: 32px; gap: 0; overflow-x: auto; scrollbar-width: none; }
+  .feed-tabs::-webkit-scrollbar { display: none; }
+  .feed-tab { background: none; border: none; padding: 14px 20px; font-family: inherit; font-size: 14px; color: var(--ink-mute); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+  .feed-tab:hover { color: var(--ink); }
+  .feed-tab.active { color: var(--ink); border-bottom-color: var(--accent); font-weight: 500; }
+  .tab-count { background: var(--bg-soft); color: var(--ink-soft); font-size: 11px; padding: 2px 8px; border-radius: 10px; font-family: var(--serif-en); letter-spacing: 0.05em; }
+  .feed-tab.active .tab-count { background: var(--accent); color: var(--paper); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeIn 0.4s; }
+  .filter-bar-feed { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+  .filter-label { font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; margin-right: 8px; }
+  .filter-chip { background: var(--paper); border: 1px solid var(--line); padding: 6px 14px; font-size: 13px; cursor: pointer; border-radius: 2px; transition: all 0.2s; font-family: inherit; color: var(--ink); }
+  .filter-chip:hover { border-color: var(--accent-soft); }
+  .filter-chip.active { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+  .profile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .profile-card { background: var(--paper); border: 1px solid var(--line); border-radius: 2px; padding: 24px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 14px; }
+  .profile-card:hover { border-color: var(--accent-soft); transform: translateY(-2px); }
+  .profile-card-header { display: flex; align-items: center; gap: 12px; }
+  .profile-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: var(--paper); display: flex; align-items: center; justify-content: center; font-family: var(--serif-ko); font-weight: 500; font-size: 20px; flex-shrink: 0; overflow: hidden; }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .profile-avatar-lg { width: 96px; height: 96px; font-size: 32px; }
+  .profile-meta { flex: 1; min-width: 0; }
+  .profile-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-family: var(--serif-en); font-size: 10px; padding: 3px 8px; border-radius: 2px; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid; }
+  .tag-gender { border-color: var(--moss); color: var(--moss); }
+  .tag-age { border-color: var(--earth); color: var(--earth); }
+  .tag-day { border-color: var(--accent-soft); color: var(--accent-soft); }
+  .tag-lifestyle { border-color: var(--ink-mute); color: var(--ink-soft); font-family: inherit; font-size: 11px; letter-spacing: 0; text-transform: none; }
+  .profile-card-intro { font-family: var(--serif-ko); font-size: 15px; line-height: 1.6; color: var(--ink); flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+  .profile-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--line-soft); font-size: 12px; color: var(--ink-mute); font-family: var(--serif-en); letter-spacing: 0.05em; }
+  .profile-card-region { color: var(--ink-soft); }
+  .req-status { display: inline-block; padding: 4px 10px; border-radius: 2px; font-size: 11px; font-family: var(--serif-en); letter-spacing: 0.15em; text-transform: uppercase; border: 1px solid; }
+  .req-status-pending { border-color: var(--warning); color: var(--warning); }
+  .req-status-accepted { border-color: var(--success-c); color: var(--success-c); background: rgba(90,122,74,0.06); }
+  .req-status-rejected { border-color: var(--ink-mute); color: var(--ink-mute); font-family: var(--serif-ko); text-transform: none; letter-spacing: 0; font-style: italic; }
+  .modal { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(26,26,23,0.5); align-items: center; justify-content: center; padding: 24px; }
+  .modal.active { display: flex; }
+  .modal-content { background: var(--paper); border: 1px solid var(--line); padding: 36px; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; border-radius: 2px; }
+  .modal-eyebrow { font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.25em; color: var(--moss); text-transform: uppercase; margin-bottom: 8px; }
+  .modal-title { font-family: var(--serif-ko); font-size: 22px; font-weight: 500; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+  .pd-header { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+  .pd-intro { font-family: var(--serif-ko); font-size: 17px; line-height: 1.7; color: var(--ink); text-align: center; margin-bottom: 24px; padding: 20px; background: var(--bg-soft); border-radius: 2px; }
+  .pd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .pd-field { padding: 12px 14px; background: var(--bg); border: 1px solid var(--line-soft); border-radius: 2px; }
+  .pd-field-label { font-family: var(--serif-en); font-size: 10px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; margin-bottom: 4px; }
+  .pd-field-value { font-size: 14px; color: var(--ink); }
+  .contact-reveal-box { margin-top: 16px; padding: 20px; background: rgba(90,122,74,0.06); border: 1px solid var(--success-c); border-radius: 2px; }
+  .contact-reveal-title { font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--success-c); text-transform: uppercase; margin-bottom: 12px; }
+  .contact-item { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px dashed var(--line-soft); }
+  .contact-item:last-child { border-bottom: none; }
+  .contact-item-type { font-family: var(--serif-en); color: var(--ink-mute); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .contact-item-value { color: var(--ink); font-weight: 500; }
+  .copy-btn { background: transparent; border: 1px solid var(--line); color: var(--ink-mute); padding: 2px 8px; font-size: 10px; margin-left: 8px; cursor: pointer; border-radius: 2px; font-family: var(--serif-en); letter-spacing: 0.1em; text-transform: uppercase; }
+  .copy-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .modal-actions { display: flex; gap: 8px; margin-top: 24px; }
+  .request-list { display: flex; flex-direction: column; gap: 12px; }
+  .request-item { background: var(--paper); border: 1px solid var(--line); border-radius: 2px; padding: 20px; display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; }
+  .request-info { min-width: 0; cursor: pointer; }
+  .request-name { font-family: var(--serif-ko); font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+  .request-msg { font-size: 13px; color: var(--ink-soft); line-height: 1.6; font-style: italic; }
+  .request-meta { font-size: 11px; color: var(--ink-mute); font-family: var(--serif-en); letter-spacing: 0.1em; margin-top: 6px; }
+  .request-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+  .mini-btn { padding: 8px 14px; font-size: 12px; font-family: inherit; cursor: pointer; border-radius: 2px; transition: all 0.2s; border: 1px solid; background: transparent; letter-spacing: 0.05em; }
+  .mini-btn-accept { border-color: var(--success-c); color: var(--success-c); }
+  .mini-btn-accept:hover { background: var(--success-c); color: var(--paper); }
+  .mini-btn-reject { border-color: var(--line); color: var(--ink-mute); }
+  .mini-btn-reject:hover { border-color: var(--error); color: var(--error); }
+  .mini-btn-view { border-color: var(--accent); color: var(--accent); }
+  .mini-btn-view:hover { background: var(--accent); color: var(--paper); }
+  .empty-state { text-align: center; padding: 80px 20px; color: var(--ink-mute); }
+  .empty-state-title { font-family: var(--serif-ko); font-size: 18px; margin-bottom: 8px; }
+  .empty-state-desc { font-size: 14px; line-height: 1.7; }
+  .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--ink); color: var(--paper); padding: 14px 24px; border-radius: 4px; font-size: 14px; z-index: 500; transition: transform 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .footer { border-top: 1px solid var(--line); padding: 32px; text-align: center; font-size: 12px; color: var(--ink-mute); font-family: var(--serif-en); letter-spacing: 0.1em; }
+  .footer .admin-trigger { display: inline-block; margin-top: 10px; background: none; border: none; color: var(--ink-mute); font-family: inherit; font-size: 11px; letter-spacing: 0.2em; cursor: pointer; padding: 4px 8px; text-transform: uppercase; }
+  .footer .admin-trigger:hover { color: var(--ink); }
+  .admin-overlay { display: none; position: fixed; inset: 0; z-index: 100; background: var(--bg); overflow-y: auto; }
+  .admin-overlay.active { display: block; }
+  .login-modal { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .admin-dash { display: none; max-width: 1200px; margin: 0 auto; padding: 40px 32px 80px; }
+  .admin-dash.active { display: block; }
+  .admin-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+  .admin-title-group .admin-eyebrow { font-family: var(--serif-en); font-size: 12px; letter-spacing: 0.25em; color: var(--moss); text-transform: uppercase; margin-bottom: 8px; }
+  .admin-title-group h2 { font-family: var(--serif-ko); font-size: 36px; font-weight: 500; }
+  .admin-actions { display: flex; gap: 8px; }
+  .admin-btn { background: transparent; border: 1px solid var(--line); color: var(--ink); padding: 10px 16px; font-family: var(--serif-en); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; border-radius: 2px; }
+  .admin-btn:hover { border-color: var(--ink); background: var(--bg-soft); }
+  .admin-btn.danger:hover { border-color: var(--error); color: var(--error); }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 40px; }
+  .stat { background: var(--paper); padding: 24px 20px; }
+  .stat-label { font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; margin-bottom: 10px; }
+  .stat-value { font-family: var(--serif-ko); font-size: 30px; font-weight: 500; line-height: 1; }
+  .stat-value .unit { font-size: 13px; color: var(--ink-mute); margin-left: 4px; font-weight: 400; }
+  .stat-value.moss { color: var(--moss); }
+  .admin-section-title { font-family: var(--serif-ko); font-size: 20px; font-weight: 500; margin-bottom: 16px; margin-top: 36px; }
+  .admin-table { background: var(--paper); border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
+  .admin-table-row { display: grid; grid-template-columns: auto 1fr auto auto; gap: 16px; padding: 16px 20px; border-bottom: 1px solid var(--line-soft); align-items: center; transition: background 0.2s; }
+  .admin-table-row:last-child { border-bottom: none; }
+  .admin-table-row:hover { background: var(--bg-soft); }
+  .config-warning { position: fixed; top: 0; left: 0; right: 0; background: var(--warning); color: white; padding: 12px 24px; text-align: center; font-size: 13px; z-index: 1000; }
+  .loading-overlay { position: fixed; inset: 0; background: rgba(245, 241, 232, 0.85); z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+  .loading-overlay.active { display: flex; }
+  .spinner { width: 32px; height: 32px; border: 2px solid var(--line); border-top-color: var(--moss); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: var(--serif-en); font-size: 12px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; }
+  @media (max-width: 640px) {
+    .topbar { padding: 14px 16px; }
+    .topbar-right { gap: 8px; font-size: 11px; }
+    .home-hero { padding: 60px 20px 40px; }
+    .home-cta { flex-direction: column; }
+    .form-section { padding: 32px 20px 80px; }
+    .options.cols-3, .options.cols-4 { grid-template-columns: 1fr 1fr; }
+    .festival-info { padding: 0 20px; grid-template-columns: 1fr; }
+    .feed-wrap { padding: 20px 16px; }
+    .profile-grid { grid-template-columns: 1fr; }
+    .pd-grid { grid-template-columns: 1fr; }
+    .request-item { grid-template-columns: auto 1fr; }
+    .request-actions { grid-column: 1 / -1; flex-direction: row; justify-content: flex-end; }
+    .admin-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .admin-dash { padding: 24px 20px 60px; }
+    .contact-row { grid-template-columns: 1fr; }
+    .contact-row > .contact-remove { justify-self: end; }
+  }
+</style>
+</head>
+<body>
+<!-- Config 경고 (Supabase 미설정 시) -->
+<div class="config-warning" id="configWarning" style="display:none;">
+  ⚠️ Supabase가 설정되지 않았습니다. HTML 상단의 SUPABASE_URL과 SUPABASE_ANON_KEY를 입력하세요.
+</div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Loading</div>
+</div>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="brand" onclick="handleBrandClick()">HANDYBUS <span class="dot"></span> THE AIR HOUSE</div>
+  <div class="topbar-right">
+    <span id="topbarMeta">2026.05.23 — 05.25</span>
+    <div class="user-chip" id="userChip" onclick="goToFeed()">
+      <div class="user-chip-avatar" id="userChipAvatar"></div>
+      <span class="user-chip-name" id="userChipName"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ============== HOME ============== -->
+<div class="page active" id="page-home">
+  <section class="home-hero">
+    <div class="home-eyebrow">Companion Matching</div>
+    <h1 class="home-title">자연을 함께 누릴<br><span class="em">동행</span>을 찾습니다</h1>
+    <p class="home-desc">혼자도 좋지만, 취향이 통하는 사람과 함께라면<br>페스티벌의 모든 순간이 더 깊어집니다.<br>프로필을 등록하고, 함께할 사람을 찾아보세요.</p>
+    <div class="home-cta">
+      <button class="btn btn-ghost" onclick="goToPage('login')" style="flex:1;">로그인</button>
+      <button class="btn btn-primary" onclick="goToPage('register')" style="flex:1;">프로필 등록</button>
+    </div>
+  </section>
+  <div class="festival-info">
+    <div class="festival-info-item"><div class="festival-info-label">When</div><div class="festival-info-value">2026.05.23 — 05.25</div></div>
+    <div class="festival-info-item"><div class="festival-info-label">Where</div><div class="festival-info-value">남이섬 · Nami Island</div></div>
+    <div class="festival-info-item"><div class="festival-info-label">Operated by</div><div class="festival-info-value">핸디버스 Handybus</div></div>
+  </div>
+  <footer class="footer">
+    <div>HANDYBUS × THE AIR HOUSE · COMPANION MATCHING 2026</div>
+    <button class="admin-trigger" onclick="openAdminLogin()">Admin</button>
+  </footer>
+</div>
+
+<!-- ============== LOGIN ============== -->
+<div class="page" id="page-login">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-eyebrow">Welcome Back</div>
+      <h2 class="auth-title">로그인</h2>
+      <p class="auth-sub">프로필 등록 시 입력한 전화번호로 로그인하세요</p>
+      <div class="error-msg" id="loginErrorMsg" style="margin-bottom: 16px;">등록된 프로필을 찾을 수 없습니다.</div>
+      <div class="auth-form-group">
+        <label>전화번호</label>
+        <input type="tel" class="input" id="loginPhone" placeholder="010-0000-0000" onkeydown="if(event.key==='Enter')doUserLogin()">
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 24px;">
+        <button class="btn btn-ghost" onclick="goHome()" style="flex: 1;">취소</button>
+        <button class="btn btn-primary" onclick="doUserLogin()" style="flex: 1;">로그인</button>
+      </div>
+      <div style="text-align: center; margin-top: 24px; font-size: 13px; color: var(--ink-mute);">
+        아직 프로필이 없으신가요?
+        <button onclick="goToPage('register')" style="background: none; border: none; color: var(--moss); cursor: pointer; font-family: inherit; font-size: 13px; text-decoration: underline;">프로필 등록하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== REGISTER ============== -->
+<div class="page" id="page-register">
+  <section class="form-section">
+    <button class="back-link" onclick="goHome()">← 홈으로</button>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-text" id="progressTextLeft">01</div>
+      <div class="progress"><div class="progress-fill" id="progressFill" style="width: 8%"></div></div>
+      <div class="progress-text" id="progressText">/ 13</div>
+    </div>
+
+    <div class="step active" data-step="1">
+      <div class="step-num">Question 01</div>
+      <h2 class="step-title">프로필 사진을 올려주세요</h2>
+      <p class="step-desc">선택사항이지만, 사진이 있으면 매칭 확률이 높아져요.</p>
+      <div class="photo-uploader">
+        <label class="photo-preview" id="photoPreview" for="photoInput">
+          <div class="photo-placeholder">
+            <svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <div class="photo-placeholder-text">Add Photo</div>
+          </div>
+        </label>
+        <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
+        <div class="photo-actions" id="photoActions" style="display:none;">
+          <button type="button" class="photo-btn" onclick="document.getElementById('photoInput').click()">Change</button>
+          <button type="button" class="photo-btn" onclick="removePhoto()">Remove</button>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="next()">다음 → <span id="skipNote" style="margin-left: 6px; opacity: 0.6; font-size: 12px;">(건너뛰기)</span></button>
+      </div>
+    </div>
+
+    <div class="step" data-step="2">
+      <div class="step-num">Question 02</div>
+      <h2 class="step-title">어떻게 불러드릴까요?</h2>
+      <p class="step-desc">실명이 아니어도 좋아요. 닉네임이나 별명도 환영해요.</p>
+      <div class="input-wrap"><input type="text" class="input" id="nickname" maxlength="20" placeholder="예: 민지, MJ, 페스티벌러버" oninput="checkInput('nickname')"></div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
+    </div>
+
+    <div class="step" data-step="3">
+      <div class="step-num">Question 03</div>
+      <h2 class="step-title">성별이 어떻게 되세요?</h2>
+      <p class="step-desc">매칭 시 참고하는 정보입니다.</p>
+      <div class="options cols-2">
+        <button class="option" data-value="여성" onclick="selectOption(this, 'gender', false)">여성</button>
+        <button class="option" data-value="남성" onclick="selectOption(this, 'gender', false)">남성</button>
+      </div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
+    </div>
+
+    <div class="step" data-step="4">
+      <div class="step-num">Question 04</div>
+      <h2 class="step-title">나이대는 어떻게 되세요?</h2>
+      <p class="step-desc">비슷한 또래로 매칭해드릴게요.</p>
+      <div class="options cols-3">
+        <button class="option" data-value="10대" onclick="selectOption(this, 'age', false)">10대<span class="option-sub">~19</span></button>
+        <button class="option" data-value="20대 초반" onclick="selectOption(this, 'age', false)">20대 초반<span class="option-sub">20—24</span></button>
+        <button class="option" data-value="20대 후반" onclick="selectOption(this, 'age', false)">20대 후반<span class="option-sub">25—29</span></button>
+        <button class="option" data-value="30대 초반" onclick="selectOption(this, 'age', false)">30대 초반<span class="option-sub">30—34</span></button>
+        <button class="option" data-value="30대 후반" onclick="selectOption(this, 'age', false)">30대 후반<span class="option-sub">35—39</span></button>
+        <button class="option" data-value="40대" onclick="selectOption(this, 'age', false)">40대<span class="option-sub">40—49</span></button>
+        <button class="option" data-value="50대" onclick="selectOption(this, 'age', false)">50대<span class="option-sub">50—59</span></button>
+        <button class="option" data-value="60대 이상" onclick="selectOption(this, 'age', false)">60대 이상<span class="option-sub">60+</span></button>
+        <button class="option" data-value="비밀" onclick="selectOption(this, 'age', false)">비밀<span class="option-sub">Private</span></button>
+      </div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
+    </div>
+
+    <div class="step" data-step="5">
+      <div class="step-num">Question 05</div>
+      <h2 class="step-title">어느 날 가실 예정인가요?</h2>
+      <p class="step-desc">중복 선택할 수 있어요.</p>
+      <div class="options cols-3">
+        <button class="option" data-value="23일 (토)" onclick="selectOption(this, 'days', true)">23일 토<span class="option-sub">May 23 Sat</span></button>
+        <button class="option" data-value="24일 (일)" onclick="selectOption(this, 'days', true)">24일 일<span class="option-sub">May 24 Sun</span></button>
+        <button class="option" data-value="25일 (월)" onclick="selectOption(this, 'days', true)">25일 월<span class="option-sub">May 25 Mon</span></button>
+      </div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
+    </div>
+
+    <div class="step" data-step="6">
+      <div class="step-num">Question 06</div>
+      <h2 class="step-title">어디서 출발하세요?</h2>
+      <p class="step-desc">같은 지역끼리 묶어드릴 수도 있어요.</p>
+      <div class="input-wrap"><input type="text" class="input" id="region" placeholder="예: 서울 강남, 부산 해운대, 대구" oninput="checkInput('region')"></div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
+    </div>
+
+    <div class="step" data-step="7">
+      <div class="step-num">Question 07</div>
+      <h2 class="step-title">왜 동행을 찾으시나요?</h2>
+      <p class="step-desc">목적이 비슷한 사람과 더 즐거워집니다.</p>
+      <div class="options">
+        <button class="option" data-value="같이 갈 사람이 없어서" onclick="selectOption(this, 'reason', false)" style="text-align: left;">같이 갈 사람이 없어서</button>
+        <button class="option" data-value="새로운 사람 만나고 싶어서" onclick="selectOption(this, 'reason', false)" style="text-align: left;">새로운 사람 만나고 싶어서</button>
+        <button class="option" data-value="사진/영상 같이 찍고 싶어서" onclick="selectOption(this, 'reason', false)" style="text-align: left;">사진 · 영상 같이 찍고 싶어서</button>
+        <button class="option" data-value="함께하면 즐거우니까!" onclick="selectOption(this, 'reason', false)" style="text-align: left;">함께하면 즐거우니까!</button>
+      </div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
+    </div>
+
+    <div class="step" data-step="8">
+      <div class="step-num">Question 08</div>
+      <h2 class="step-title">흡연하시나요?</h2>
+      <p class="step-desc">서로 편하게 즐기기 위해 참고해요.</p>
+      <div class="options cols-2">
+        <button class="option" data-value="비흡연" onclick="selectOption(this, 'smoking', false)">비흡연</button>
+        <button class="option" data-value="가끔" onclick="selectOption(this, 'smoking', false)">가끔</button>
+        <button class="option" data-value="흡연" onclick="selectOption(this, 'smoking', false)">흡연</button>
+        <button class="option" data-value="비밀" onclick="selectOption(this, 'smoking', false)">비밀<span class="option-sub">Private</span></button>
+      </div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
+    </div>
+
+    <div class="step" data-step="9">
+      <div class="step-num">Question 09</div>
+      <h2 class="step-title">음주는 어떻게 하시나요?</h2>
+      <p class="step-desc">분위기가 잘 맞는 사람과 어울리기 좋아요.</p>
+      <div class="options cols-2">
+        <button class="option" data-value="안 마심" onclick="selectOption(this, 'drinking', false)">안 마심</button>
+        <button class="option" data-value="가볍게" onclick="selectOption(this, 'drinking', false)">가볍게</button>
+        <button class="option" data-value="즐기는 편" onclick="selectOption(this, 'drinking', false)">즐기는 편</button>
+        <button class="option" data-value="비밀" onclick="selectOption(this, 'drinking', false)">비밀<span class="option-sub">Private</span></button>
+      </div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
+    </div>
+
+    <div class="step" data-step="10">
+      <div class="step-num">Question 10</div>
+      <h2 class="step-title">MBTI가 어떻게 되세요?</h2>
+      <p class="step-desc">성향 매칭의 클래식이죠.</p>
+      <div class="options cols-4">
+        <button class="option small" data-value="INTJ" onclick="selectOption(this, 'mbti', false)">INTJ</button>
+        <button class="option small" data-value="INTP" onclick="selectOption(this, 'mbti', false)">INTP</button>
+        <button class="option small" data-value="ENTJ" onclick="selectOption(this, 'mbti', false)">ENTJ</button>
+        <button class="option small" data-value="ENTP" onclick="selectOption(this, 'mbti', false)">ENTP</button>
+        <button class="option small" data-value="INFJ" onclick="selectOption(this, 'mbti', false)">INFJ</button>
+        <button class="option small" data-value="INFP" onclick="selectOption(this, 'mbti', false)">INFP</button>
+        <button class="option small" data-value="ENFJ" onclick="selectOption(this, 'mbti', false)">ENFJ</button>
+        <button class="option small" data-value="ENFP" onclick="selectOption(this, 'mbti', false)">ENFP</button>
+        <button class="option small" data-value="ISTJ" onclick="selectOption(this, 'mbti', false)">ISTJ</button>
+        <button class="option small" data-value="ISFJ" onclick="selectOption(this, 'mbti', false)">ISFJ</button>
+        <button class="option small" data-value="ESTJ" onclick="selectOption(this, 'mbti', false)">ESTJ</button>
+        <button class="option small" data-value="ESFJ" onclick="selectOption(this, 'mbti', false)">ESFJ</button>
+        <button class="option small" data-value="ISTP" onclick="selectOption(this, 'mbti', false)">ISTP</button>
+        <button class="option small" data-value="ISFP" onclick="selectOption(this, 'mbti', false)">ISFP</button>
+        <button class="option small" data-value="ESTP" onclick="selectOption(this, 'mbti', false)">ESTP</button>
+        <button class="option small" data-value="ESFP" onclick="selectOption(this, 'mbti', false)">ESFP</button>
+      </div>
+      <div style="margin-top: 8px;">
+        <button class="option small" data-value="비밀" onclick="selectOption(this, 'mbti', false)" style="width: 100%;">모름 / 비밀</button>
+      </div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
+    </div>
+
+    <div class="step" data-step="11">
+      <div class="step-num">Question 11</div>
+      <h2 class="step-title">좋아하는 음악 장르는?</h2>
+      <p class="step-desc">중복 선택할 수 있어요. <span class="hint">최대 5개</span></p>
+      <div class="options cols-3" id="genreGrid">
+        <button class="option small" data-value="테크노" onclick="selectMusicGenre(this)">테크노</button>
+        <button class="option small" data-value="하우스" onclick="selectMusicGenre(this)">하우스</button>
+        <button class="option small" data-value="EDM" onclick="selectMusicGenre(this)">EDM</button>
+        <button class="option small" data-value="일렉트로닉" onclick="selectMusicGenre(this)">일렉트로닉</button>
+        <button class="option small" data-value="인디" onclick="selectMusicGenre(this)">인디</button>
+        <button class="option small" data-value="K-pop" onclick="selectMusicGenre(this)">K-pop</button>
+        <button class="option small" data-value="힙합" onclick="selectMusicGenre(this)">힙합</button>
+        <button class="option small" data-value="R&B / Soul" onclick="selectMusicGenre(this)">R&B / Soul</button>
+        <button class="option small" data-value="재즈" onclick="selectMusicGenre(this)">재즈</button>
+        <button class="option small" data-value="록 / 메탈" onclick="selectMusicGenre(this)">록 / 메탈</button>
+        <button class="option small" data-value="팝" onclick="selectMusicGenre(this)">팝</button>
+        <button class="option small" data-value="장르 가리지 않음" onclick="selectMusicGenre(this)">장르 안 가림</button>
+      </div>
+      <div style="margin-top: 8px;">
+        <button class="option small" data-value="비밀" onclick="selectMusicGenre(this)" style="width: 100%;" id="genrePrivateBtn">비밀</button>
+      </div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
+    </div>
+
+    <div class="step" data-step="12">
+      <div class="step-num">Question 12</div>
+      <h2 class="step-title">짧게 자기소개 해주세요</h2>
+      <p class="step-desc">좋아하는 아티스트, 취미 등 뭐든 좋아요.</p>
+      <div class="input-wrap">
+        <textarea class="textarea" id="intro" maxlength="100" placeholder="예시 · Peggy Gou 좋아해요, 사진 찍는 거 좋아하는 편" oninput="checkInput('intro'); updateCharCount();"></textarea>
+        <span class="char-count"><span id="charCount">0</span> / 100</span>
+      </div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
+    </div>
+
+    <div class="step" data-step="13">
+      <div class="step-num">Question 13 · 마지막</div>
+      <h2 class="step-title">연락처를 알려주세요</h2>
+      <p class="step-desc"><strong style="color: var(--ink);">전화번호는 로그인용으로 사용되며 공개되지 않습니다.</strong><br>오픈 채널은 동행 요청이 수락되었을 때 상대방에게 공개돼요.</p>
+      <div style="margin-bottom: 32px;">
+        <label style="display: block; font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; margin-bottom: 8px;">로그인용 전화번호 <span style="color: var(--error);">*</span></label>
+        <input type="tel" class="input" id="phone" placeholder="010-0000-0000" oninput="checkPhone()">
+        <div class="error-msg" id="phoneError">올바른 전화번호 형식이 아닙니다.</div>
+        <div class="error-msg" id="phoneDupError">이미 등록된 전화번호입니다. 로그인해주세요.</div>
+      </div>
+      <div>
+        <label style="display: block; font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; margin-bottom: 8px;">공개 연락 채널 <span style="color: var(--error);">*</span> <span style="color: var(--ink-mute); text-transform: none; letter-spacing: 0; font-family: var(--sans); font-size: 12px; margin-left: 8px;">수락 시 공개 · 1개 이상</span></label>
+        <div class="contacts-list" id="contactsList"></div>
+        <button class="add-contact-btn" onclick="addContactRow()">＋ 연락처 추가</button>
+      </div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="submitForm()" id="finalSubmitBtn">프로필 등록하기 →</button></div>
+    </div>
+  </section>
+</div>
+
+<!-- ============== SUCCESS (별도 페이지) ============== -->
+<div class="page" id="page-success">
+  <div class="success-page">
+    <div class="success-inner">
+      <div class="success-mark"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></div>
+      <h2 class="success-title" id="successTitle">프로필이 등록되었습니다</h2>
+      <p class="success-desc" id="successDesc">이제 다른 사람들의 프로필을 둘러보고<br>마음에 드는 사람에게 동행을 요청해보세요.</p>
+      <button class="btn btn-primary btn-block" onclick="goToFeed()">동행 찾으러 가기 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== EDIT PROFILE ============== -->
+<div class="page" id="page-edit">
+  <section class="form-section">
+    <button class="back-link" onclick="goToFeed()">← 피드로</button>
+    <h2 style="font-family: var(--serif-ko); font-size: 32px; font-weight: 500; margin-bottom: 8px;">프로필 수정</h2>
+    <p style="font-size: 15px; color: var(--ink-soft); margin-bottom: 40px; font-weight: 300;">언제든 자유롭게 수정할 수 있어요.</p>
+
+    <div style="margin-bottom: 40px;">
+      <div class="step-num">Profile Photo</div>
+      <div class="photo-uploader" style="margin-top: 16px;">
+        <label class="photo-preview" id="editPhotoPreview" for="editPhotoInput">
+          <div class="photo-placeholder">
+            <svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <div class="photo-placeholder-text">Add Photo</div>
+          </div>
+        </label>
+        <input type="file" id="editPhotoInput" accept="image/*" style="display:none;" onchange="handleEditPhotoUpload(event)">
+        <div class="photo-actions" id="editPhotoActions" style="display:none;">
+          <button type="button" class="photo-btn" onclick="document.getElementById('editPhotoInput').click()">Change</button>
+          <button type="button" class="photo-btn" onclick="removeEditPhoto()">Remove</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 32px;"><div class="step-num">Nickname</div><input type="text" class="input" id="editNickname" maxlength="20" style="margin-top: 12px;"></div>
+
+    <div style="margin-bottom: 32px;">
+      <div class="step-num">Gender</div>
+      <div class="options cols-2" id="editGenderOpts" style="margin-top: 12px;">
+        <button class="option" data-value="여성" onclick="editSelectOption(this, 'gender')">여성</button>
+        <button class="option" data-value="남성" onclick="editSelectOption(this, 'gender')">남성</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 32px;">
+      <div class="step-num">Age</div>
+      <div class="options cols-3" id="editAgeOpts" style="margin-top: 12px;">
+        <button class="option" data-value="10대" onclick="editSelectOption(this, 'age')">10대</button>
+        <button class="option" data-value="20대 초반" onclick="editSelectOption(this, 'age')">20대 초반</button>
+        <button class="option" data-value="20대 후반" onclick="editSelectOption(this, 'age')">20대 후반</button>
+        <button class="option" data-value="30대 초반" onclick="editSelectOption(this, 'age')">30대 초반</button>
+        <button class="option" data-value="30대 후반" onclick="editSelectOption(this, 'age')">30대 후반</button>
+        <button class="option" data-value="40대" onclick="editSelectOption(this, 'age')">40대</button>
+        <button class="option" data-value="50대" onclick="editSelectOption(this, 'age')">50대</button>
+        <button class="option" data-value="60대 이상" onclick="editSelectOption(this, 'age')">60대 이상</button>
+        <button class="option" data-value="비밀" onclick="editSelectOption(this, 'age')">비밀</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 32px;">
+      <div class="step-num">Days Attending</div>
+      <div class="options cols-3" id="editDaysOpts" style="margin-top: 12px;">
+        <button class="option" data-value="23일 (토)" onclick="editToggleDay(this)">23일 토</button>
+        <button class="option" data-value="24일 (일)" onclick="editToggleDay(this)">24일 일</button>
+        <button class="option" data-value="25일 (월)" onclick="editToggleDay(this)">25일 월</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 32px;"><div class="step-num">From</div><input type="text" class="input" id="editRegion" style="margin-top: 12px;"></div>
+
+    <div style="margin-bottom: 32px;">
+      <div class="step-num">Reason</div>
+      <div class="options" id="editReasonOpts" style="margin-top: 12px;">
+        <button class="option" data-value="같이 갈 사람이 없어서" onclick="editSelectOption(this, 'reason')" style="text-align: left;">같이 갈 사람이 없어서</button>
+        <button class="option" data-value="새로운 사람 만나고 싶어서" onclick="editSelectOption(this, 'reason')" style="text-align: left;">새로운 사람 만나고 싶어서</button>
+        <button class="option" data-value="사진/영상 같이 찍고 싶어서" onclick="editSelectOption(this, 'reason')" style="text-align: left;">사진 · 영상 같이 찍고 싶어서</button>
+        <button class="option" data-value="함께하면 즐거우니까!" onclick="editSelectOption(this, 'reason')" style="text-align: left;">함께하면 즐거우니까!</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 32px;">
+      <div class="step-num">Smoking</div>
+      <div class="options cols-2" id="editSmokingOpts" style="margin-top: 12px;">
+        <button class="option" data-value="비흡연" onclick="editSelectOption(this, 'smoking')">비흡연</button>
+        <button class="option" data-value="가끔" onclick="editSelectOption(this, 'smoking')">가끔</button>
+        <button class="option" data-value="흡연" onclick="editSelectOption(this, 'smoking')">흡연</button>
+        <button class="option" data-value="비밀" onclick="editSelectOption(this, 'smoking')">비밀</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 32px;">
+      <div class="step-num">Drinking</div>
+      <div class="options cols-2" id="editDrinkingOpts" style="margin-top: 12px;">
+        <button class="option" data-value="안 마심" onclick="editSelectOption(this, 'drinking')">안 마심</button>
+        <button class="option" data-value="가볍게" onclick="editSelectOption(this, 'drinking')">가볍게</button>
+        <button class="option" data-value="즐기는 편" onclick="editSelectOption(this, 'drinking')">즐기는 편</button>
+        <button class="option" data-value="비밀" onclick="editSelectOption(this, 'drinking')">비밀</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 32px;">
+      <div class="step-num">MBTI</div>
+      <div class="options cols-4" id="editMbtiOpts" style="margin-top: 12px;">
+        <button class="option small" data-value="INTJ" onclick="editSelectOption(this, 'mbti')">INTJ</button>
+        <button class="option small" data-value="INTP" onclick="editSelectOption(this, 'mbti')">INTP</button>
+        <button class="option small" data-value="ENTJ" onclick="editSelectOption(this, 'mbti')">ENTJ</button>
+        <button class="option small" data-value="ENTP" onclick="editSelectOption(this, 'mbti')">ENTP</button>
+        <button class="option small" data-value="INFJ" onclick="editSelectOption(this, 'mbti')">INFJ</button>
+        <button class="option small" data-value="INFP" onclick="editSelectOption(this, 'mbti')">INFP</button>
+        <button class="option small" data-value="ENFJ" onclick="editSelectOption(this, 'mbti')">ENFJ</button>
+        <button class="option small" data-value="ENFP" onclick="editSelectOption(this, 'mbti')">ENFP</button>
+        <button class="option small" data-value="ISTJ" onclick="editSelectOption(this, 'mbti')">ISTJ</button>
+        <button class="option small" data-value="ISFJ" onclick="editSelectOption(this, 'mbti')">ISFJ</button>
+        <button class="option small" data-value="ESTJ" onclick="editSelectOption(this, 'mbti')">ESTJ</button>
+        <button class="option small" data-value="ESFJ" onclick="editSelectOption(this, 'mbti')">ESFJ</button>
+        <button class="option small" data-value="ISTP" onclick="editSelectOption(this, 'mbti')">ISTP</button>
+        <button class="option small" data-value="ISFP" onclick="editSelectOption(this, 'mbti')">ISFP</button>
+        <button class="option small" data-value="ESTP" onclick="editSelectOption(this, 'mbti')">ESTP</button>
+        <button class="option small" data-value="ESFP" onclick="editSelectOption(this, 'mbti')">ESFP</button>
+      </div>
+      <div style="margin-top: 8px;">
+        <button class="option small" data-value="비밀" onclick="editSelectOption(this, 'mbti', 'editMbtiOpts')" style="width: 100%;" id="editMbtiPrivate">모름 / 비밀</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 32px;">
+      <div class="step-num">Music Genres</div>
+      <p style="font-size: 13px; color: var(--ink-mute); margin-top: 6px;">최대 5개까지 선택할 수 있어요.</p>
+      <div class="options cols-3" id="editGenresOpts" style="margin-top: 12px;">
+        <button class="option small" data-value="테크노" onclick="editToggleGenre(this)">테크노</button>
+        <button class="option small" data-value="하우스" onclick="editToggleGenre(this)">하우스</button>
+        <button class="option small" data-value="EDM" onclick="editToggleGenre(this)">EDM</button>
+        <button class="option small" data-value="일렉트로닉" onclick="editToggleGenre(this)">일렉트로닉</button>
+        <button class="option small" data-value="인디" onclick="editToggleGenre(this)">인디</button>
+        <button class="option small" data-value="K-pop" onclick="editToggleGenre(this)">K-pop</button>
+        <button class="option small" data-value="힙합" onclick="editToggleGenre(this)">힙합</button>
+        <button class="option small" data-value="R&B / Soul" onclick="editToggleGenre(this)">R&B / Soul</button>
+        <button class="option small" data-value="재즈" onclick="editToggleGenre(this)">재즈</button>
+        <button class="option small" data-value="록 / 메탈" onclick="editToggleGenre(this)">록 / 메탈</button>
+        <button class="option small" data-value="팝" onclick="editToggleGenre(this)">팝</button>
+        <button class="option small" data-value="장르 가리지 않음" onclick="editToggleGenre(this)">장르 안 가림</button>
+      </div>
+      <div style="margin-top: 8px;">
+        <button class="option small" data-value="비밀" onclick="editToggleGenre(this)" style="width: 100%;" id="editGenrePrivateBtn">비밀</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 32px;">
+      <div class="step-num">Self Introduction</div>
+      <div class="input-wrap" style="margin-top: 12px;">
+        <textarea class="textarea" id="editIntro" maxlength="100" oninput="updateEditCharCount()"></textarea>
+        <span class="char-count"><span id="editCharCount">0</span> / 100</span>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 32px;">
+      <div class="step-num">Public Contacts</div>
+      <p style="font-size: 13px; color: var(--ink-mute); margin-top: 6px; margin-bottom: 12px;">동행 수락 시 공개되는 연락 채널이에요.</p>
+      <div class="contacts-list" id="editContactsList"></div>
+      <button class="add-contact-btn" onclick="addEditContactRow()">＋ 연락처 추가</button>
+    </div>
+
+    <div class="btn-row"><button class="btn btn-ghost" onclick="goToFeed()">취소</button><button class="btn btn-primary" onclick="saveEditProfile()">변경사항 저장 →</button></div>
+  </section>
+</div>
+
+<!-- ============== FEED ============== -->
+<div class="page" id="page-feed">
+  <div class="feed-wrap">
+    <div class="feed-tabs">
+      <button class="feed-tab active" data-tab="discover" onclick="switchTab('discover')">동행 찾기</button>
+      <button class="feed-tab" data-tab="received" onclick="switchTab('received')">받은 요청 <span class="tab-count" id="countReceived">0</span></button>
+      <button class="feed-tab" data-tab="sent" onclick="switchTab('sent')">보낸 요청 <span class="tab-count" id="countSent">0</span></button>
+      <button class="feed-tab" data-tab="matched" onclick="switchTab('matched')">성사된 동행 <span class="tab-count" id="countMatched">0</span></button>
+      <button class="feed-tab" data-tab="me" onclick="switchTab('me')">내 프로필</button>
+    </div>
+    <div class="tab-content active" id="tab-discover">
+      <div class="filter-bar-feed">
+        <span class="filter-label">By day</span>
+        <button class="filter-chip active" data-filter="all" onclick="setDiscoverFilter('all')">전체</button>
+        <button class="filter-chip" data-filter="23일" onclick="setDiscoverFilter('23일')">23일 토</button>
+        <button class="filter-chip" data-filter="24일" onclick="setDiscoverFilter('24일')">24일 일</button>
+        <button class="filter-chip" data-filter="25일" onclick="setDiscoverFilter('25일')">25일 월</button>
+      </div>
+      <div id="discoverGrid"></div>
+    </div>
+    <div class="tab-content" id="tab-received"><div id="receivedList"></div></div>
+    <div class="tab-content" id="tab-sent"><div id="sentList"></div></div>
+    <div class="tab-content" id="tab-matched"><div id="matchedGrid"></div></div>
+    <div class="tab-content" id="tab-me"><div id="meContent"></div></div>
+  </div>
+  <footer class="footer"><div>HANDYBUS × THE AIR HOUSE · COMPANION MATCHING 2026</div></footer>
+</div>
+
+<!-- Modals -->
+<div class="modal" id="profileModal" onclick="if(event.target===this) closeProfileModal()"><div class="modal-content" id="profileModalContent"></div></div>
+
+<div class="modal" id="requestModal" onclick="if(event.target===this) closeRequestModal()">
+  <div class="modal-content">
+    <div class="modal-eyebrow">Send Companion Request</div>
+    <h3 class="modal-title" id="requestModalTitle">동행 요청 보내기</h3>
+    <p style="font-size: 14px; color: var(--ink-soft); margin-bottom: 16px; line-height: 1.7;">메시지를 함께 보내면 수락 확률이 높아져요. (선택)</p>
+    <textarea class="textarea" id="requestMessage" maxlength="200" placeholder="예: 안녕하세요! 23일에 같이 가실 분 찾고 있었어요." style="min-height: 120px;"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeRequestModal()" style="flex: 1;">취소</button>
+      <button class="btn btn-primary" onclick="confirmSendRequest()" style="flex: 1;">요청 보내기 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="login-modal" id="adminLoginModal">
+    <div class="auth-card">
+      <div class="auth-eyebrow">Admin Access</div>
+      <h2 class="auth-title">관리자 로그인</h2>
+      <p class="auth-sub">관리자 권한이 필요합니다</p>
+      <div class="error-msg" id="adminLoginError" style="margin-bottom: 16px;">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+      <div class="auth-form-group"><label>ID</label><input type="text" class="input" id="adminLoginId" autocomplete="off" placeholder="관리자 아이디"></div>
+      <div class="auth-form-group"><label>Password</label><input type="password" class="input" id="adminLoginPw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
+      <div style="display: flex; gap: 8px; margin-top: 24px;">
+        <button class="btn btn-ghost" onclick="closeAdmin()" style="flex: 1;">취소</button>
+        <button class="btn btn-primary" onclick="doAdminLogin()" style="flex: 1;">로그인</button>
+      </div>
+    </div>
+  </div>
+  <div class="admin-dash" id="adminDash">
+    <div class="admin-header">
+      <div class="admin-title-group"><div class="admin-eyebrow">Companion Matching · Admin</div><h2>관리자 대시보드</h2></div>
+      <div class="admin-actions">
+        <button class="admin-btn" onclick="refreshAdminData()">새로고침</button>
+        <button class="admin-btn" onclick="exportCSV()">CSV 내보내기</button>
+        <button class="admin-btn danger" onclick="clearAll()">전체 삭제</button>
+        <button class="admin-btn" onclick="adminLogout()">로그아웃</button>
+      </div>
+    </div>
+    <div class="stats-grid" id="adminStatsGrid"></div>
+    <h3 class="admin-section-title">전체 프로필</h3>
+    <div class="admin-table" id="adminProfileList"></div>
+    <h3 class="admin-section-title">동행 요청 내역</h3>
+    <div class="admin-table" id="adminRequestList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+  // ============================================================
+  // 🔧 SUPABASE 설정 (이 두 값을 본인 프로젝트 값으로 교체하세요)
+  // ============================================================
+  // Supabase 대시보드 → Settings → API 에서 복사
+  const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';        // 예: https://abcdefgh.supabase.co
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE'; // eyJhbGciO... 로 시작하는 긴 문자열
+  // ============================================================
+  
+  // 어드민 계정
+  const ADMIN_ID = 'handybus';
+  const ADMIN_PW = 'handybus123!';
+  
+  // 상수
+  const TOTAL_STEPS = 13;
+  const MAX_GENRES = 5;
+  const SESSION_USER_KEY = 'airhouse_user_id';
+  const SESSION_ADMIN_KEY = 'airhouse_admin_ok';
+  const CONTACT_TYPES = [
+    { value: 'kakao', label: '카카오톡 ID' },
+    { value: 'instagram', label: '인스타그램' },
+    { value: 'twitter', label: '트위터(X)' },
+    { value: 'phone', label: '전화번호' },
+    { value: 'email', label: '이메일' },
+    { value: 'other', label: '기타' }
+  ];
+  
+  // Supabase 클라이언트 초기화
+  let sb = null;
+  const isConfigured = SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY_HERE' && SUPABASE_URL && SUPABASE_ANON_KEY;
+  
+  if (isConfigured) {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } else {
+    document.getElementById('configWarning').style.display = 'block';
+  }
+  
+  // 상태
+  let currentStep = 1;
+  let formData = { days: [], photo: null, contacts: [], genres: [] };
+  let editData = {};
+  let currentUser = null;
+  let discoverFilter = 'all';
+  let pendingRequestTargetId = null;
+  let profilesCache = [];
+  let requestsCache = [];
+  
+  // ============ DB API (Supabase) ============
+  function dbToProfile(row) {
+    // DB snake_case → JS camelCase
+    return {
+      id: row.id,
+      nickname: row.nickname,
+      photo: row.photo,
+      gender: row.gender,
+      age: row.age,
+      days: row.days || [],
+      region: row.region,
+      reason: row.reason,
+      smoking: row.smoking,
+      drinking: row.drinking,
+      mbti: row.mbti,
+      genres: row.genres || [],
+      intro: row.intro,
+      phone: row.phone,
+      contacts: row.contacts || [],
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
+  }
+  
+  function profileToDb(p) {
+    return {
+      id: p.id,
+      nickname: p.nickname,
+      photo: p.photo,
+      gender: p.gender,
+      age: p.age,
+      days: p.days || [],
+      region: p.region,
+      reason: p.reason,
+      smoking: p.smoking,
+      drinking: p.drinking,
+      mbti: p.mbti,
+      genres: p.genres || [],
+      intro: p.intro,
+      phone: p.phone,
+      contacts: p.contacts || []
+    };
+  }
+  
+  function dbToRequest(row) {
+    return {
+      id: row.id,
+      fromId: row.from_id,
+      toId: row.to_id,
+      message: row.message,
+      status: row.status,
+      createdAt: row.created_at,
+      respondedAt: row.responded_at
+    };
+  }
+  
+  async function fetchProfiles() {
+    if (!sb) return [];
+    const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+    if (error) { console.error('fetchProfiles:', error); showToast('데이터를 불러오지 못했어요.'); return []; }
+    profilesCache = (data || []).map(dbToProfile);
+    return profilesCache;
+  }
+  
+  async function fetchRequests() {
+    if (!sb) return [];
+    const { data, error } = await sb.from('requests').select('*').order('created_at', { ascending: false });
+    if (error) { console.error('fetchRequests:', error); return []; }
+    requestsCache = (data || []).map(dbToRequest);
+    return requestsCache;
+  }
+  
+  async function findProfileByPhone(phone) {
+    if (!sb) return null;
+    const cleaned = normalizePhone(phone);
+    // SQL 측에서 정규화가 안되므로 클라이언트에서 fetch 후 비교
+    const profiles = await fetchProfiles();
+    return profiles.find(p => normalizePhone(p.phone) === cleaned) || null;
+  }
+  
+  async function insertProfile(profile) {
+    if (!sb) throw new Error('Supabase 미설정');
+    const { data, error } = await sb.from('profiles').insert(profileToDb(profile)).select().single();
+    if (error) throw error;
+    return dbToProfile(data);
+  }
+  
+  async function updateProfile(id, patch) {
+    if (!sb) throw new Error('Supabase 미설정');
+    const payload = profileToDb({ ...currentUser, ...patch });
+    delete payload.id;
+    const { data, error } = await sb.from('profiles').update(payload).eq('id', id).select().single();
+    if (error) throw error;
+    return dbToProfile(data);
+  }
+  
+  async function deleteProfileDb(id) {
+    if (!sb) throw new Error('Supabase 미설정');
+    const { error } = await sb.from('profiles').delete().eq('id', id);
+    if (error) throw error;
+  }
+  
+  async function insertRequest(req) {
+    if (!sb) throw new Error('Supabase 미설정');
+    const { data, error } = await sb.from('requests').insert({
+      id: req.id,
+      from_id: req.fromId,
+      to_id: req.toId,
+      message: req.message,
+      status: req.status
+    }).select().single();
+    if (error) throw error;
+    return dbToRequest(data);
+  }
+  
+  async function updateRequestStatus(id, status) {
+    if (!sb) throw new Error('Supabase 미설정');
+    const { error } = await sb.from('requests').update({
+      status,
+      responded_at: new Date().toISOString()
+    }).eq('id', id);
+    if (error) throw error;
+  }
+  
+  async function deleteRequestDb(id) {
+    if (!sb) throw new Error('Supabase 미설정');
+    const { error } = await sb.from('requests').delete().eq('id', id);
+    if (error) throw error;
+  }
+  
+  // ============ UI 도우미 ============
+  function showLoading(text) {
+    document.getElementById('loadingText').textContent = text || 'Loading';
+    document.getElementById('loadingOverlay').classList.add('active');
+  }
+  function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('active');
+  }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2400);
+  }
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+  }
+  function copyText(text) {
+    navigator.clipboard.writeText(text).then(() => showToast('복사되었어요!'));
+  }
+  function normalizePhone(p) {
+    return (p || '').replace(/[^0-9]/g, '');
+  }
+  
+  // ============ NAVIGATION ============
+  function goToPage(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (page === 'register') resetRegisterForm();
+    if (page === 'login') {
+      document.getElementById('loginPhone').value = '';
+      document.getElementById('loginErrorMsg').classList.remove('show');
+      setTimeout(() => document.getElementById('loginPhone').focus(), 100);
+    }
+  }
+  function goHome() {
+    if (currentUser) { goToFeed(); return; }
+    goToPage('home');
+  }
+  function handleBrandClick() {
+    if (currentUser) goToFeed();
+    else goToPage('home');
+  }
+  async function goToFeed() {
+    if (!currentUser) {
+      const id = sessionStorage.getItem(SESSION_USER_KEY);
+      if (id && sb) {
+        showLoading('Loading');
+        const { data } = await sb.from('profiles').select('*').eq('id', id).single();
+        if (data) currentUser = dbToProfile(data);
+        hideLoading();
+      }
+      if (!currentUser) { goToPage('home'); return; }
+    }
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-feed').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    updateTopbar();
+    await renderFeed();
+  }
+  function goToSuccess(title, desc) {
+    document.getElementById('successTitle').textContent = title || '프로필이 등록되었습니다';
+    document.getElementById('successDesc').innerHTML = desc || '이제 다른 사람들의 프로필을 둘러보고<br>마음에 드는 사람에게 동행을 요청해보세요.';
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-success').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  
+  // ============ AUTH ============
+  async function doUserLogin() {
+    if (!sb) { showToast('Supabase 설정이 필요합니다.'); return; }
+    const raw = document.getElementById('loginPhone').value.trim();
+    const phone = normalizePhone(raw);
+    const errEl = document.getElementById('loginErrorMsg');
+    if (phone.length < 9) {
+      errEl.textContent = '전화번호 형식을 확인해주세요.';
+      errEl.classList.add('show');
+      return;
+    }
+    showLoading('Signing in');
+    const profile = await findProfileByPhone(phone);
+    hideLoading();
+    if (!profile) {
+      errEl.textContent = '등록된 프로필을 찾을 수 없습니다.';
+      errEl.classList.add('show');
+      return;
+    }
+    currentUser = profile;
+    sessionStorage.setItem(SESSION_USER_KEY, profile.id);
+    updateTopbar();
+    await goToFeed();
+    showToast('환영합니다, ' + profile.nickname + '님!');
+  }
+  
+  async function restoreSession() {
+    if (!sb) return;
+    const id = sessionStorage.getItem(SESSION_USER_KEY);
+    if (!id) return;
+    const { data } = await sb.from('profiles').select('*').eq('id', id).single();
+    if (data) {
+      currentUser = dbToProfile(data);
+      updateTopbar();
+    } else {
+      sessionStorage.removeItem(SESSION_USER_KEY);
+    }
+  }
+  
+  function updateTopbar() {
+    const chip = document.getElementById('userChip');
+    if (currentUser) {
+      chip.classList.add('active');
+      const avatar = document.getElementById('userChipAvatar');
+      if (currentUser.photo) avatar.innerHTML = `<img src="${currentUser.photo}" alt="">`;
+      else avatar.textContent = (currentUser.nickname || '·')[0];
+      document.getElementById('userChipName').textContent = currentUser.nickname;
+    } else {
+      chip.classList.remove('active');
+    }
+  }
+  
+  // ============ REGISTER FORM ============
+  function selectOption(el, key, multi) {
+    if (multi) {
+      el.classList.toggle('selected');
+      if (!Array.isArray(formData[key])) formData[key] = [];
+      const val = el.dataset.value;
+      const idx = formData[key].indexOf(val);
+      if (idx >= 0) formData[key].splice(idx, 1);
+      else formData[key].push(val);
+      if (formData[key].length > 0) enableNext(); else disableNext();
+    } else {
+      const step = el.closest('.step');
+      step.querySelectorAll('.option').forEach(s => s.classList.remove('selected'));
+      el.classList.add('selected');
+      formData[key] = el.dataset.value;
+      enableNext();
+    }
+  }
+  
+  function selectMusicGenre(el) {
+    const val = el.dataset.value;
+    if (!Array.isArray(formData.genres)) formData.genres = [];
+    const isExclusive = (val === '비밀' || val === '장르 가리지 않음');
+    const currentExclusive = formData.genres.find(g => g === '비밀' || g === '장르 가리지 않음');
+    const step = el.closest('.step');
+    
+    if (isExclusive) {
+      formData.genres = [val];
+      step.querySelectorAll('.option').forEach(o => o.classList.toggle('selected', o.dataset.value === val));
+    } else {
+      if (currentExclusive) {
+        formData.genres = formData.genres.filter(g => g !== '비밀' && g !== '장르 가리지 않음');
+        step.querySelectorAll('.option').forEach(o => {
+          if (o.dataset.value === '비밀' || o.dataset.value === '장르 가리지 않음') o.classList.remove('selected');
+        });
+      }
+      const idx = formData.genres.indexOf(val);
+      if (idx >= 0) { formData.genres.splice(idx, 1); el.classList.remove('selected'); }
+      else {
+        if (formData.genres.length >= MAX_GENRES) { showToast(`최대 ${MAX_GENRES}개까지 선택할 수 있어요.`); return; }
+        formData.genres.push(val);
+        el.classList.add('selected');
+      }
+    }
+    if (formData.genres.length > 0) enableNext(); else disableNext();
+  }
+  
+  function checkInput(key) {
+    const val = document.getElementById(key).value.trim();
+    if (val) { formData[key] = val; enableNext(); }
+    else { delete formData[key]; disableNext(); }
+  }
+  
+  async function checkPhone() {
+    const raw = document.getElementById('phone').value.trim();
+    const cleaned = normalizePhone(raw);
+    const errEl = document.getElementById('phoneError');
+    const dupEl = document.getElementById('phoneDupError');
+    dupEl.classList.remove('show');
+    
+    if (cleaned.length >= 9 && cleaned.length <= 15) {
+      // 중복 체크
+      const dup = await findProfileByPhone(cleaned);
+      if (dup) {
+        delete formData.phone;
+        errEl.classList.remove('show');
+        dupEl.classList.add('show');
+      } else {
+        formData.phone = raw;
+        errEl.classList.remove('show');
+      }
+    } else if (raw.length > 0) {
+      delete formData.phone;
+      if (cleaned.length > 5) errEl.classList.add('show');
+      else errEl.classList.remove('show');
+    } else {
+      delete formData.phone;
+      errEl.classList.remove('show');
+    }
+    validateFinalStep();
+  }
+  
+  function validateFinalStep() {
+    const hasPhone = !!formData.phone;
+    const hasContact = formData.contacts && formData.contacts.length > 0 && formData.contacts.every(c => c.type && c.value && c.value.trim());
+    document.getElementById('finalSubmitBtn').disabled = !(hasPhone && hasContact);
+  }
+  
+  function updateCharCount() { document.getElementById('charCount').textContent = document.getElementById('intro').value.length; }
+  function enableNext() { const s = document.querySelector('#page-register .step.active'); if (s) { const b = s.querySelector('.btn-primary'); if (b) b.disabled = false; } }
+  function disableNext() { const s = document.querySelector('#page-register .step.active'); if (s) { const b = s.querySelector('.btn-primary'); if (b) b.disabled = true; } }
+  function updateProgress() {
+    const pct = (currentStep / TOTAL_STEPS) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressTextLeft').textContent = String(currentStep).padStart(2, '0');
+    document.getElementById('progressText').textContent = '/ ' + String(TOTAL_STEPS).padStart(2, '0');
+  }
+  function next() {
+    if (currentStep >= TOTAL_STEPS) return;
+    document.querySelector('#page-register .step.active').classList.remove('active');
+    currentStep++;
+    document.querySelector(`#page-register .step[data-step="${currentStep}"]`).classList.add('active');
+    updateProgress();
+    if (currentStep === TOTAL_STEPS) {
+      if (formData.contacts.length === 0) addContactRow();
+      validateFinalStep();
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function prev() {
+    if (currentStep <= 1) return;
+    document.querySelector('#page-register .step.active').classList.remove('active');
+    currentStep--;
+    document.querySelector(`#page-register .step[data-step="${currentStep}"]`).classList.add('active');
+    updateProgress();
+  }
+  
+  // ============ PHOTO ============
+  function compressImage(file, callback) {
+    if (file.size > 5 * 1024 * 1024) { showToast('이미지는 5MB 이하만 가능해요.'); return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const MAX = 400;
+        let w = img.width, h = img.height;
+        if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
+        else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        callback(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    compressImage(file, (data) => {
+      formData.photo = data;
+      document.getElementById('photoPreview').innerHTML = `<img src="${data}" alt="">`;
+      document.getElementById('photoActions').style.display = 'flex';
+      document.getElementById('skipNote').style.display = 'none';
+    });
+  }
+  function removePhoto() {
+    formData.photo = null;
+    document.getElementById('photoInput').value = '';
+    document.getElementById('photoPreview').innerHTML = `<div class="photo-placeholder"><svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div class="photo-placeholder-text">Add Photo</div></div>`;
+    document.getElementById('photoActions').style.display = 'none';
+    document.getElementById('skipNote').style.display = 'inline';
+  }
+  
+  // ============ CONTACTS ============
+  function addContactRow() {
+    if (!formData.contacts) formData.contacts = [];
+    formData.contacts.push({ type: 'kakao', value: '' });
+    renderContacts();
+  }
+  function renderContacts() {
+    document.getElementById('contactsList').innerHTML = formData.contacts.map((c, i) => `
+      <div class="contact-row">
+        <select class="contact-select" onchange="updateContactType(${i}, this.value)">
+          ${CONTACT_TYPES.map(t => `<option value="${t.value}" ${c.type===t.value?'selected':''}>${t.label}</option>`).join('')}
+        </select>
+        <input type="text" class="input" placeholder="${getContactPlaceholder(c.type)}" value="${escapeHtml(c.value)}" oninput="updateContactValue(${i}, this.value)">
+        <button class="contact-remove" onclick="removeContactRow(${i})" title="삭제">×</button>
+      </div>
+    `).join('');
+    validateFinalStep();
+  }
+  function getContactPlaceholder(type) {
+    return { kakao: '카카오톡 ID', instagram: '@your_handle', twitter: '@your_handle', phone: '010-0000-0000', email: 'you@example.com', other: '자유롭게 입력' }[type] || '';
+  }
+  function updateContactType(idx, type) { formData.contacts[idx].type = type; renderContacts(); }
+  function updateContactValue(idx, value) { formData.contacts[idx].value = value; validateFinalStep(); }
+  function removeContactRow(idx) { formData.contacts.splice(idx, 1); if (formData.contacts.length === 0) addContactRow(); else renderContacts(); }
+  
+  // ============ SUBMIT REGISTER ============
+  async function submitForm() {
+    if (!sb) { showToast('Supabase 설정이 필요합니다.'); return; }
+    
+    const profile = {
+      id: 'prof_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+      nickname: formData.nickname,
+      photo: formData.photo,
+      gender: formData.gender,
+      age: formData.age,
+      days: formData.days,
+      region: formData.region,
+      reason: formData.reason,
+      smoking: formData.smoking,
+      drinking: formData.drinking,
+      mbti: formData.mbti,
+      genres: formData.genres,
+      intro: formData.intro,
+      phone: formData.phone,
+      contacts: formData.contacts.filter(c => c.type && c.value && c.value.trim())
+    };
+    
+    showLoading('Saving profile');
+    try {
+      const saved = await insertProfile(profile);
+      currentUser = saved;
+      sessionStorage.setItem(SESSION_USER_KEY, saved.id);
+      updateTopbar();
+      hideLoading();
+      goToSuccess('프로필이 등록되었습니다', '이제 다른 사람들의 프로필을 둘러보고<br>마음에 드는 사람에게 동행을 요청해보세요.');
+    } catch (err) {
+      hideLoading();
+      console.error(err);
+      if (err.code === '23505') showToast('이미 등록된 전화번호입니다.');
+      else showToast('저장 중 오류가 발생했어요.');
+    }
+  }
+  
+  function resetRegisterForm() {
+    formData = { days: [], photo: null, contacts: [], genres: [] };
+    currentStep = 1;
+    document.querySelectorAll('#page-register .step').forEach(s => s.classList.remove('active'));
+    document.querySelector('#page-register .step[data-step="1"]').classList.add('active');
+    document.querySelectorAll('#page-register .option.selected').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('#page-register input, #page-register textarea').forEach(i => i.value = '');
+    document.querySelectorAll('#page-register .btn-primary').forEach(b => { b.disabled = b.id !== 'finalSubmitBtn'; });
+    document.querySelector('#page-register .step[data-step="1"] .btn-primary').disabled = false;
+    document.querySelectorAll('#page-register .error-msg').forEach(e => e.classList.remove('show'));
+    removePhoto();
+    updateProgress();
+    updateCharCount();
+    document.getElementById('contactsList').innerHTML = '';
+  }
+  
+  // ============ EDIT PROFILE ============
+  function goToEditProfile() {
+    if (!currentUser) return;
+    editData = JSON.parse(JSON.stringify(currentUser));
+    if (!editData.contacts) editData.contacts = [];
+    if (!editData.days) editData.days = [];
+    if (!editData.genres) editData.genres = [];
+    
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-edit').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    
+    document.getElementById('editNickname').value = editData.nickname || '';
+    document.getElementById('editRegion').value = editData.region || '';
+    document.getElementById('editIntro').value = editData.intro || '';
+    updateEditCharCount();
+    
+    if (editData.photo) {
+      document.getElementById('editPhotoPreview').innerHTML = `<img src="${editData.photo}" alt="">`;
+      document.getElementById('editPhotoActions').style.display = 'flex';
+    } else {
+      document.getElementById('editPhotoPreview').innerHTML = `<div class="photo-placeholder"><svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div class="photo-placeholder-text">Add Photo</div></div>`;
+      document.getElementById('editPhotoActions').style.display = 'none';
+    }
+    
+    // Single selects
+    const singleKeys = [
+      ['gender', 'editGenderOpts'],
+      ['age', 'editAgeOpts'],
+      ['reason', 'editReasonOpts'],
+      ['smoking', 'editSmokingOpts'],
+      ['drinking', 'editDrinkingOpts']
+    ];
+    singleKeys.forEach(([key, containerId]) => {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.querySelectorAll('.option').forEach(o => o.classList.toggle('selected', o.dataset.value === editData[key]));
+    });
+    // MBTI - 그리드 + 별도 비밀 버튼
+    document.querySelectorAll('#editMbtiOpts .option').forEach(o => o.classList.toggle('selected', o.dataset.value === editData.mbti));
+    document.getElementById('editMbtiPrivate').classList.toggle('selected', editData.mbti === '비밀');
+    
+    // Days (multi)
+    document.querySelectorAll('#editDaysOpts .option').forEach(o => o.classList.toggle('selected', editData.days.includes(o.dataset.value)));
+    
+    // Genres (multi)
+    document.querySelectorAll('#editGenresOpts .option').forEach(o => o.classList.toggle('selected', editData.genres.includes(o.dataset.value)));
+    document.getElementById('editGenrePrivateBtn').classList.toggle('selected', editData.genres.includes('비밀'));
+    
+    renderEditContacts();
+  }
+  
+  function editSelectOption(el, key, scopeId) {
+    if (key === 'mbti') {
+      // MBTI: 그리드 + 별도 비밀 버튼 모두 해제 후 선택
+      document.querySelectorAll('#editMbtiOpts .option').forEach(s => s.classList.remove('selected'));
+      document.getElementById('editMbtiPrivate').classList.remove('selected');
+      el.classList.add('selected');
+    } else {
+      const container = el.parentElement;
+      container.querySelectorAll('.option').forEach(s => s.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+    editData[key] = el.dataset.value;
+  }
+  
+  function editToggleDay(el) {
+    el.classList.toggle('selected');
+    const val = el.dataset.value;
+    if (!Array.isArray(editData.days)) editData.days = [];
+    const idx = editData.days.indexOf(val);
+    if (idx >= 0) editData.days.splice(idx, 1);
+    else editData.days.push(val);
+  }
+  
+  function editToggleGenre(el) {
+    const val = el.dataset.value;
+    if (!Array.isArray(editData.genres)) editData.genres = [];
+    const isExclusive = (val === '비밀' || val === '장르 가리지 않음');
+    const currentExclusive = editData.genres.find(g => g === '비밀' || g === '장르 가리지 않음');
+    
+    if (isExclusive) {
+      editData.genres = [val];
+      document.querySelectorAll('#editGenresOpts .option').forEach(o => o.classList.toggle('selected', o.dataset.value === val));
+      document.getElementById('editGenrePrivateBtn').classList.toggle('selected', val === '비밀');
+    } else {
+      if (currentExclusive) {
+        editData.genres = editData.genres.filter(g => g !== '비밀' && g !== '장르 가리지 않음');
+        document.querySelectorAll('#editGenresOpts .option').forEach(o => { if (o.dataset.value === '장르 가리지 않음') o.classList.remove('selected'); });
+        document.getElementById('editGenrePrivateBtn').classList.remove('selected');
+      }
+      const idx = editData.genres.indexOf(val);
+      if (idx >= 0) { editData.genres.splice(idx, 1); el.classList.remove('selected'); }
+      else {
+        if (editData.genres.length >= MAX_GENRES) { showToast(`최대 ${MAX_GENRES}개까지 선택할 수 있어요.`); return; }
+        editData.genres.push(val);
+        el.classList.add('selected');
+      }
+    }
+  }
+  
+  function handleEditPhotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    compressImage(file, (data) => {
+      editData.photo = data;
+      document.getElementById('editPhotoPreview').innerHTML = `<img src="${data}" alt="">`;
+      document.getElementById('editPhotoActions').style.display = 'flex';
+    });
+  }
+  function removeEditPhoto() {
+    editData.photo = null;
+    document.getElementById('editPhotoInput').value = '';
+    document.getElementById('editPhotoPreview').innerHTML = `<div class="photo-placeholder"><svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div class="photo-placeholder-text">Add Photo</div></div>`;
+    document.getElementById('editPhotoActions').style.display = 'none';
+  }
+  function updateEditCharCount() { document.getElementById('editCharCount').textContent = document.getElementById('editIntro').value.length; }
+  
+  function addEditContactRow() {
+    if (!editData.contacts) editData.contacts = [];
+    editData.contacts.push({ type: 'kakao', value: '' });
+    renderEditContacts();
+  }
+  function renderEditContacts() {
+    document.getElementById('editContactsList').innerHTML = editData.contacts.map((c, i) => `
+      <div class="contact-row">
+        <select class="contact-select" onchange="updateEditContactType(${i}, this.value)">
+          ${CONTACT_TYPES.map(t => `<option value="${t.value}" ${c.type===t.value?'selected':''}>${t.label}</option>`).join('')}
+        </select>
+        <input type="text" class="input" placeholder="${getContactPlaceholder(c.type)}" value="${escapeHtml(c.value)}" oninput="updateEditContactValue(${i}, this.value)">
+        <button class="contact-remove" onclick="removeEditContactRow(${i})" title="삭제">×</button>
+      </div>
+    `).join('');
+  }
+  function updateEditContactType(idx, type) { editData.contacts[idx].type = type; renderEditContacts(); }
+  function updateEditContactValue(idx, value) { editData.contacts[idx].value = value; }
+  function removeEditContactRow(idx) { editData.contacts.splice(idx, 1); renderEditContacts(); }
+  
+  async function saveEditProfile() {
+    const nickname = document.getElementById('editNickname').value.trim();
+    const region = document.getElementById('editRegion').value.trim();
+    const intro = document.getElementById('editIntro').value.trim();
+    
+    if (!nickname) { showToast('닉네임을 입력해주세요.'); return; }
+    if (!editData.gender) { showToast('성별을 선택해주세요.'); return; }
+    if (!editData.age) { showToast('나이대를 선택해주세요.'); return; }
+    if (!editData.days || editData.days.length === 0) { showToast('참가일을 선택해주세요.'); return; }
+    if (!region) { showToast('출발지를 입력해주세요.'); return; }
+    if (!editData.reason) { showToast('동행 이유를 선택해주세요.'); return; }
+    if (!editData.smoking) { showToast('흡연 여부를 선택해주세요.'); return; }
+    if (!editData.drinking) { showToast('음주 여부를 선택해주세요.'); return; }
+    if (!editData.mbti) { showToast('MBTI를 선택해주세요.'); return; }
+    if (!editData.genres || editData.genres.length === 0) { showToast('좋아하는 음악 장르를 선택해주세요.'); return; }
+    if (!intro) { showToast('자기소개를 입력해주세요.'); return; }
+    
+    const validContacts = editData.contacts.filter(c => c.type && c.value && c.value.trim());
+    if (validContacts.length === 0) { showToast('공개 연락처를 1개 이상 추가해주세요.'); return; }
+    
+    showLoading('Saving');
+    try {
+      const updated = await updateProfile(currentUser.id, {
+        nickname, photo: editData.photo, gender: editData.gender, age: editData.age,
+        days: editData.days, region, reason: editData.reason,
+        smoking: editData.smoking, drinking: editData.drinking,
+        mbti: editData.mbti, genres: editData.genres,
+        intro, contacts: validContacts
+      });
+      currentUser = updated;
+      updateTopbar();
+      hideLoading();
+      showToast('프로필이 수정되었습니다.');
+      await goToFeed();
+    } catch (err) {
+      hideLoading();
+      console.error(err);
+      showToast('수정 중 오류가 발생했어요.');
+    }
+  }
+  
+  // ============ FEED ============
+  function switchTab(tab) {
+    document.querySelectorAll('.feed-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + tab));
+    renderTab(tab);
+  }
+  
+  async function renderFeed() {
+    showLoading('Loading');
+    await Promise.all([fetchProfiles(), fetchRequests()]);
+    hideLoading();
+    renderTabCounts();
+    renderTab('discover');
+  }
+  
+  function renderTabCounts() {
+    document.getElementById('countReceived').textContent = requestsCache.filter(r => r.toId === currentUser.id && r.status === 'pending').length;
+    document.getElementById('countSent').textContent = requestsCache.filter(r => r.fromId === currentUser.id).length;
+    document.getElementById('countMatched').textContent = requestsCache.filter(r => (r.toId === currentUser.id || r.fromId === currentUser.id) && r.status === 'accepted').length;
+  }
+  
+  async function renderTab(tab) {
+    if (tab === 'discover') renderDiscover();
+    else if (tab === 'received') renderReceived();
+    else if (tab === 'sent') renderSent();
+    else if (tab === 'matched') renderMatched();
+    else if (tab === 'me') renderMe();
+  }
+  
+  function setDiscoverFilter(f) {
+    discoverFilter = f;
+    document.querySelectorAll('#tab-discover .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.filter === f));
+    renderDiscover();
+  }
+  
+  function renderDiscover() {
+    let others = profilesCache.filter(p => p.id !== currentUser.id);
+    if (discoverFilter !== 'all') {
+      others = others.filter(p => (p.days || []).some(d => d && d.includes(discoverFilter)));
+    }
+    const grid = document.getElementById('discoverGrid');
+    if (others.length === 0) {
+      grid.innerHTML = `<div class="empty-state"><div class="empty-state-title">아직 다른 프로필이 없어요</div><div class="empty-state-desc">새로운 사람이 등록되면 여기에 표시됩니다.</div></div>`;
+      return;
+    }
+    grid.innerHTML = '<div class="profile-grid">' + others.map(renderProfileCard).join('') + '</div>';
+  }
+  
+  function renderProfileCard(p) {
+    const dayTags = (p.days || []).slice(0,3).map(d => `<span class="tag tag-day">${escapeHtml(d.replace(/\s*\([^)]*\)/,''))}</span>`).join('');
+    const avatar = p.photo
+      ? `<div class="profile-avatar"><img src="${p.photo}" alt=""></div>`
+      : `<div class="profile-avatar">${escapeHtml((p.nickname || '·')[0])}</div>`;
+    return `
+      <div class="profile-card" onclick="openProfileModal('${p.id}')">
+        <div class="profile-card-header">
+          ${avatar}
+          <div class="profile-meta">
+            <div style="font-family: var(--serif-ko); font-size: 17px; font-weight: 500; margin-bottom: 6px;">${escapeHtml(p.nickname)}</div>
+            <div class="profile-tags">
+              <span class="tag tag-gender">${escapeHtml(p.gender || '-')}</span>
+              <span class="tag tag-age">${escapeHtml(p.age || '-')}</span>
+              ${p.mbti && p.mbti !== '비밀' ? `<span class="tag tag-lifestyle">${escapeHtml(p.mbti)}</span>` : ''}
+            </div>
+          </div>
+        </div>
+        <div class="profile-tags">${dayTags}</div>
+        <div class="profile-card-intro">${escapeHtml(p.intro || '')}</div>
+        <div class="profile-card-footer">
+          <span class="profile-card-region">📍 ${escapeHtml(p.region || '-')}</span>
+          <span>${escapeHtml((p.reason||'').slice(0,12))}</span>
+        </div>
+      </div>
+    `;
+  }
+  
+  function getRequestBetween(meId, otherId) {
+    return requestsCache.find(r => (r.fromId === meId && r.toId === otherId) || (r.fromId === otherId && r.toId === meId));
+  }
+  
+  function openProfileModal(profileId) {
+    const p = profilesCache.find(x => x.id === profileId);
+    if (!p) return;
+    const existing = getRequestBetween(currentUser.id, p.id);
+    const isAccepted = existing && existing.status === 'accepted';
+    const isPendingSent = existing && existing.status === 'pending' && existing.fromId === currentUser.id;
+    const isPendingReceived = existing && existing.status === 'pending' && existing.toId === currentUser.id;
+    const isRejected = existing && existing.status === 'rejected';
+    
+    const avatar = p.photo
+      ? `<div class="profile-avatar profile-avatar-lg"><img src="${p.photo}" alt=""></div>`
+      : `<div class="profile-avatar profile-avatar-lg">${escapeHtml((p.nickname || '·')[0])}</div>`;
+    const dayTags = (p.days || []).map(d => `<span class="tag tag-day">${escapeHtml(d)}</span>`).join('');
+    const genreTags = (p.genres || []).map(g => `<span class="tag tag-lifestyle">${escapeHtml(g)}</span>`).join('');
+    
+    let contactSection = '';
+    if (isAccepted) {
+      const items = (p.contacts || []).map(c => {
+        const typeLabel = (CONTACT_TYPES.find(t => t.value === c.type) || {label: c.type}).label;
+        return `<div class="contact-item"><span class="contact-item-type">${escapeHtml(typeLabel)}</span><span><span class="contact-item-value">${escapeHtml(c.value)}</span><button class="copy-btn" onclick="copyText('${escapeHtml(c.value).replace(/'/g,"\\'")}')">Copy</button></span></div>`;
+      }).join('');
+      contactSection = `<div class="contact-reveal-box"><div class="contact-reveal-title">✓ 연락처 공개</div>${items}</div>`;
+    } else if (isPendingSent) {
+      contactSection = `<div style="text-align: center; padding: 16px; background: rgba(184,132,58,0.06); border: 1px solid var(--warning); border-radius: 2px; margin-top: 16px;"><span class="req-status req-status-pending">요청 대기 중</span><p style="font-size: 13px; color: var(--ink-soft); margin-top: 10px;">상대방이 수락하면 연락처가 공개됩니다.</p></div>`;
+    } else if (isPendingReceived) {
+      contactSection = `<div style="text-align: center; padding: 16px; background: rgba(184,132,58,0.06); border: 1px solid var(--warning); border-radius: 2px; margin-top: 16px;"><p style="font-size: 14px; color: var(--ink); margin-bottom: 4px; font-weight: 500;">${escapeHtml(p.nickname)}님이 동행을 요청했어요</p>${existing.message ? `<p style="font-size: 13px; color: var(--ink-soft); font-style: italic; margin-top: 8px;">"${escapeHtml(existing.message)}"</p>` : ''}<div style="display: flex; gap: 8px; margin-top: 14px;"><button class="mini-btn mini-btn-reject" onclick="respondRequest('${existing.id}', 'rejected')" style="flex:1;">다음 기회에...</button><button class="mini-btn mini-btn-accept" onclick="respondRequest('${existing.id}', 'accepted')" style="flex:1;">수락</button></div></div>`;
+    } else if (isRejected) {
+      contactSection = `<div style="text-align: center; padding: 16px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 2px; margin-top: 16px;"><span class="req-status req-status-rejected">다음 기회에...</span></div>`;
+    }
+    
+    const actionButton = (!existing) ? `<div class="modal-actions"><button class="btn btn-ghost" onclick="closeProfileModal()" style="flex: 1;">닫기</button><button class="btn btn-primary" onclick="openRequestModal('${p.id}')" style="flex: 1;">동행 요청하기 →</button></div>` : `<div class="modal-actions"><button class="btn btn-ghost btn-block" onclick="closeProfileModal()">닫기</button></div>`;
+    
+    document.getElementById('profileModalContent').innerHTML = `
+      <div class="pd-header">
+        ${avatar}
+        <div>
+          <div style="font-family: var(--serif-ko); font-size: 24px; font-weight: 500;">${escapeHtml(p.nickname)}</div>
+          <div class="profile-tags" style="justify-content: center; margin-top: 8px;">
+            <span class="tag tag-gender">${escapeHtml(p.gender || '-')}</span>
+            <span class="tag tag-age">${escapeHtml(p.age || '-')}</span>
+            ${p.mbti && p.mbti !== '비밀' ? `<span class="tag tag-lifestyle">${escapeHtml(p.mbti)}</span>` : ''}
+          </div>
+        </div>
+      </div>
+      ${p.intro ? `<div class="pd-intro">"${escapeHtml(p.intro)}"</div>` : ''}
+      <div class="pd-grid">
+        <div class="pd-field"><div class="pd-field-label">From</div><div class="pd-field-value">${escapeHtml(p.region || '-')}</div></div>
+        <div class="pd-field"><div class="pd-field-label">Reason</div><div class="pd-field-value">${escapeHtml(p.reason || '-')}</div></div>
+        <div class="pd-field"><div class="pd-field-label">Smoking</div><div class="pd-field-value">${escapeHtml(p.smoking || '-')}</div></div>
+        <div class="pd-field"><div class="pd-field-label">Drinking</div><div class="pd-field-value">${escapeHtml(p.drinking || '-')}</div></div>
+      </div>
+      <div class="pd-field" style="margin-bottom: 12px;"><div class="pd-field-label">Attending</div><div class="pd-field-value" style="margin-top: 6px;"><div class="profile-tags">${dayTags || '<span style="color: var(--ink-mute);">-</span>'}</div></div></div>
+      ${genreTags ? `<div class="pd-field" style="margin-bottom: 16px;"><div class="pd-field-label">Music Genres</div><div class="pd-field-value" style="margin-top: 6px;"><div class="profile-tags">${genreTags}</div></div></div>` : ''}
+      ${contactSection}
+      ${actionButton}
+    `;
+    document.getElementById('profileModal').classList.add('active');
+  }
+  function closeProfileModal() { document.getElementById('profileModal').classList.remove('active'); }
+  
+  function openRequestModal(targetId) {
+    pendingRequestTargetId = targetId;
+    const profile = profilesCache.find(p => p.id === targetId);
+    document.getElementById('requestModalTitle').textContent = (profile ? profile.nickname : '동행자') + '님께 요청 보내기';
+    document.getElementById('requestMessage').value = '';
+    document.getElementById('requestModal').classList.add('active');
+  }
+  function closeRequestModal() { document.getElementById('requestModal').classList.remove('active'); pendingRequestTargetId = null; }
+  
+  async function confirmSendRequest() {
+    if (!pendingRequestTargetId) return;
+    const message = document.getElementById('requestMessage').value.trim();
+    await fetchRequests(); // 최신 상태 확인
+    const existing = getRequestBetween(currentUser.id, pendingRequestTargetId);
+    if (existing) {
+      showToast('이미 요청이 진행 중이거나 처리된 동행입니다.');
+      closeRequestModal();
+      return;
+    }
+    showLoading('Sending');
+    try {
+      await insertRequest({
+        id: 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+        fromId: currentUser.id,
+        toId: pendingRequestTargetId,
+        message: message,
+        status: 'pending'
+      });
+      await fetchRequests();
+      hideLoading();
+      closeRequestModal();
+      closeProfileModal();
+      renderTabCounts();
+      showToast('동행 요청을 보냈어요!');
+    } catch (err) {
+      hideLoading();
+      console.error(err);
+      showToast('요청 전송에 실패했어요.');
+    }
+  }
+  
+  async function respondRequest(reqId, status) {
+    showLoading('Updating');
+    try {
+      await updateRequestStatus(reqId, status);
+      await fetchRequests();
+      hideLoading();
+      closeProfileModal();
+      renderTabCounts();
+      const activeTab = document.querySelector('.feed-tab.active').dataset.tab;
+      renderTab(activeTab);
+      showToast(status === 'accepted' ? '동행이 성사되었어요!' : '다음 기회에 만나요.');
+    } catch (err) {
+      hideLoading();
+      console.error(err);
+      showToast('처리에 실패했어요.');
+    }
+  }
+  
+  function renderReceived() {
+    const list = requestsCache.filter(r => r.toId === currentUser.id && r.status === 'pending').sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const container = document.getElementById('receivedList');
+    if (list.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-state-title">받은 요청이 없어요</div><div class="empty-state-desc">누군가 동행을 요청하면 여기에 표시됩니다.</div></div>`;
+      return;
+    }
+    container.innerHTML = '<div class="request-list">' + list.map(r => {
+      const from = profilesCache.find(p => p.id === r.fromId);
+      if (!from) return '';
+      const avatar = from.photo ? `<div class="profile-avatar"><img src="${from.photo}" alt=""></div>` : `<div class="profile-avatar">${escapeHtml((from.nickname || '·')[0])}</div>`;
+      const time = new Date(r.createdAt).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
+      return `<div class="request-item">${avatar}<div class="request-info" onclick="openProfileModal('${from.id}')"><div class="request-name">${escapeHtml(from.nickname)}</div>${r.message ? `<div class="request-msg">"${escapeHtml(r.message)}"</div>` : '<div class="request-msg" style="color: var(--ink-mute);">메시지 없음</div>'}<div class="request-meta">${time}</div></div><div class="request-actions"><button class="mini-btn mini-btn-accept" onclick="respondRequest('${r.id}', 'accepted')">수락</button><button class="mini-btn mini-btn-reject" onclick="respondRequest('${r.id}', 'rejected')">다음 기회에</button></div></div>`;
+    }).join('') + '</div>';
+  }
+  
+  function renderSent() {
+    const list = requestsCache.filter(r => r.fromId === currentUser.id).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const container = document.getElementById('sentList');
+    if (list.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-state-title">보낸 요청이 없어요</div><div class="empty-state-desc">동행 찾기에서 마음에 드는 사람에게 요청을 보내보세요.</div></div>`;
+      return;
+    }
+    container.innerHTML = '<div class="request-list">' + list.map(r => {
+      const to = profilesCache.find(p => p.id === r.toId);
+      if (!to) return '';
+      const avatar = to.photo ? `<div class="profile-avatar"><img src="${to.photo}" alt=""></div>` : `<div class="profile-avatar">${escapeHtml((to.nickname || '·')[0])}</div>`;
+      const statusBadge = r.status === 'pending' ? '<span class="req-status req-status-pending">대기 중</span>' : r.status === 'accepted' ? '<span class="req-status req-status-accepted">수락됨</span>' : '<span class="req-status req-status-rejected">다음 기회에...</span>';
+      const time = new Date(r.createdAt).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
+      return `<div class="request-item">${avatar}<div class="request-info" onclick="openProfileModal('${to.id}')"><div class="request-name">${escapeHtml(to.nickname)}</div>${r.message ? `<div class="request-msg">"${escapeHtml(r.message)}"</div>` : '<div class="request-msg" style="color: var(--ink-mute);">메시지 없음</div>'}<div class="request-meta">${time}</div></div><div class="request-actions">${statusBadge}${r.status === 'accepted' ? `<button class="mini-btn mini-btn-view" onclick="openProfileModal('${to.id}')" style="margin-top:6px;">연락처 보기</button>` : ''}</div></div>`;
+    }).join('') + '</div>';
+  }
+  
+  function renderMatched() {
+    const list = requestsCache.filter(r => (r.toId === currentUser.id || r.fromId === currentUser.id) && r.status === 'accepted').sort((a,b) => new Date(b.respondedAt || b.createdAt) - new Date(a.respondedAt || a.createdAt));
+    const container = document.getElementById('matchedGrid');
+    if (list.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-state-title">아직 성사된 동행이 없어요</div><div class="empty-state-desc">동행 요청이 수락되면 여기에서 연락처를 확인할 수 있어요.</div></div>`;
+      return;
+    }
+    container.innerHTML = '<div class="profile-grid">' + list.map(r => {
+      const otherId = r.fromId === currentUser.id ? r.toId : r.fromId;
+      const p = profilesCache.find(x => x.id === otherId);
+      return p ? renderProfileCard(p) : '';
+    }).join('') + '</div>';
+  }
+  
+  function renderMe() {
+    const p = currentUser;
+    const dayTags = (p.days || []).map(d => `<span class="tag tag-day">${escapeHtml(d)}</span>`).join('');
+    const genreTags = (p.genres || []).map(g => `<span class="tag tag-lifestyle">${escapeHtml(g)}</span>`).join('');
+    const avatar = p.photo ? `<div class="profile-avatar profile-avatar-lg"><img src="${p.photo}" alt=""></div>` : `<div class="profile-avatar profile-avatar-lg">${escapeHtml((p.nickname || '·')[0])}</div>`;
+    const contactItems = (p.contacts || []).map(c => {
+      const typeLabel = (CONTACT_TYPES.find(t => t.value === c.type) || {label: c.type}).label;
+      return `<div class="contact-item"><span class="contact-item-type">${escapeHtml(typeLabel)}</span><span class="contact-item-value">${escapeHtml(c.value)}</span></div>`;
+    }).join('');
+    
+    document.getElementById('meContent').innerHTML = `
+      <div style="max-width: 600px; margin: 0 auto; background: var(--paper); border: 1px solid var(--line); padding: 36px; border-radius: 2px;">
+        <div class="pd-header">
+          ${avatar}
+          <div>
+            <div style="font-family: var(--serif-ko); font-size: 24px; font-weight: 500;">${escapeHtml(p.nickname)}</div>
+            <div class="profile-tags" style="justify-content: center; margin-top: 8px;">
+              <span class="tag tag-gender">${escapeHtml(p.gender || '-')}</span>
+              <span class="tag tag-age">${escapeHtml(p.age || '-')}</span>
+              ${p.mbti && p.mbti !== '비밀' ? `<span class="tag tag-lifestyle">${escapeHtml(p.mbti)}</span>` : ''}
+            </div>
+          </div>
+        </div>
+        ${p.intro ? `<div class="pd-intro">"${escapeHtml(p.intro)}"</div>` : ''}
+        <div class="pd-grid">
+          <div class="pd-field"><div class="pd-field-label">From</div><div class="pd-field-value">${escapeHtml(p.region || '-')}</div></div>
+          <div class="pd-field"><div class="pd-field-label">Reason</div><div class="pd-field-value">${escapeHtml(p.reason || '-')}</div></div>
+          <div class="pd-field"><div class="pd-field-label">Smoking</div><div class="pd-field-value">${escapeHtml(p.smoking || '-')}</div></div>
+          <div class="pd-field"><div class="pd-field-label">Drinking</div><div class="pd-field-value">${escapeHtml(p.drinking || '-')}</div></div>
+        </div>
+        <div class="pd-field" style="margin-bottom: 12px;"><div class="pd-field-label">Attending</div><div class="pd-field-value" style="margin-top: 6px;"><div class="profile-tags">${dayTags || '<span style="color: var(--ink-mute);">-</span>'}</div></div></div>
+        ${genreTags ? `<div class="pd-field" style="margin-bottom: 16px;"><div class="pd-field-label">Music Genres</div><div class="pd-field-value" style="margin-top: 6px;"><div class="profile-tags">${genreTags}</div></div></div>` : ''}
+        <div class="contact-reveal-box" style="background: var(--bg-soft); border-color: var(--line);">
+          <div class="contact-reveal-title" style="color: var(--ink-soft);">내 연락 채널</div>
+          ${contactItems}
+        </div>
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; gap: 8px;">
+          <button class="btn btn-ghost" onclick="goToEditProfile()" style="flex: 1;">프로필 변경</button>
+          <button class="btn btn-danger" onclick="deleteMyProfile()" style="flex: 1;">프로필 삭제</button>
+        </div>
+      </div>
+    `;
+  }
+  
+  async function deleteMyProfile() {
+    if (!confirm('정말 프로필을 삭제하시겠어요?\n관련된 모든 동행 요청도 함께 삭제됩니다.')) return;
+    showLoading('Deleting');
+    try {
+      await deleteProfileDb(currentUser.id);
+      currentUser = null;
+      sessionStorage.removeItem(SESSION_USER_KEY);
+      updateTopbar();
+      hideLoading();
+      goToPage('home');
+      showToast('프로필이 삭제되었습니다.');
+    } catch (err) {
+      hideLoading();
+      console.error(err);
+      showToast('삭제에 실패했어요.');
+    }
+  }
+  
+  // ============ ADMIN ============
+  function openAdminLogin() {
+    document.getElementById('adminOverlay').classList.add('active');
+    if (sessionStorage.getItem(SESSION_ADMIN_KEY) === 'ok') {
+      showAdminDash();
+    } else {
+      document.getElementById('adminLoginModal').style.display = 'flex';
+      document.getElementById('adminDash').classList.remove('active');
+      document.getElementById('adminLoginId').value = '';
+      document.getElementById('adminLoginPw').value = '';
+      document.getElementById('adminLoginError').classList.remove('show');
+      setTimeout(() => document.getElementById('adminLoginId').focus(), 100);
+    }
+  }
+  function closeAdmin() { document.getElementById('adminOverlay').classList.remove('active'); }
+  function doAdminLogin() {
+    const id = document.getElementById('adminLoginId').value.trim();
+    const pw = document.getElementById('adminLoginPw').value;
+    if (id === ADMIN_ID && pw === ADMIN_PW) {
+      sessionStorage.setItem(SESSION_ADMIN_KEY, 'ok');
+      showAdminDash();
+    } else {
+      document.getElementById('adminLoginError').classList.add('show');
+      document.getElementById('adminLoginPw').value = '';
+    }
+  }
+  function adminLogout() { sessionStorage.removeItem(SESSION_ADMIN_KEY); closeAdmin(); }
+  async function showAdminDash() {
+    document.getElementById('adminLoginModal').style.display = 'none';
+    document.getElementById('adminDash').classList.add('active');
+    await refreshAdminData();
+  }
+  
+  async function refreshAdminData() {
+    showLoading('Loading');
+    await Promise.all([fetchProfiles(), fetchRequests()]);
+    hideLoading();
+    renderAdminDash();
+  }
+  
+  function renderAdminDash() {
+    const countByDay = (d) => profilesCache.filter(p => (p.days||[]).some(x => x && x.includes(d))).length;
+    
+    document.getElementById('adminStatsGrid').innerHTML = `
+      <div class="stat"><div class="stat-label">Total Profiles</div><div class="stat-value moss">${profilesCache.length}<span class="unit">명</span></div></div>
+      <div class="stat"><div class="stat-label">Pending Requests</div><div class="stat-value">${requestsCache.filter(r => r.status === 'pending').length}</div></div>
+      <div class="stat"><div class="stat-label">Matched</div><div class="stat-value moss">${requestsCache.filter(r => r.status === 'accepted').length}</div></div>
+      <div class="stat"><div class="stat-label">May 23 Sat</div><div class="stat-value">${countByDay('23일')}</div></div>
+      <div class="stat"><div class="stat-label">May 24 Sun</div><div class="stat-value">${countByDay('24일')}</div></div>
+      <div class="stat"><div class="stat-label">May 25 Mon</div><div class="stat-value">${countByDay('25일')}</div></div>
+    `;
+    
+    const profileList = document.getElementById('adminProfileList');
+    if (profilesCache.length === 0) {
+      profileList.innerHTML = '<div class="empty-state"><div class="empty-state-title">아직 프로필이 없습니다</div></div>';
+    } else {
+      profileList.innerHTML = profilesCache.slice().sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map(p => {
+        const avatar = p.photo ? `<div class="profile-avatar" style="width:40px;height:40px;font-size:14px;"><img src="${p.photo}" alt=""></div>` : `<div class="profile-avatar" style="width:40px;height:40px;font-size:14px;">${escapeHtml((p.nickname||'·')[0])}</div>`;
+        const time = new Date(p.createdAt).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
+        const extra = [p.smoking, p.drinking, p.mbti].filter(Boolean).join(' · ');
+        return `<div class="admin-table-row">${avatar}<div><div style="font-weight: 500; margin-bottom: 4px;">${escapeHtml(p.nickname)} <span style="font-size: 12px; color: var(--ink-mute);">· ${escapeHtml(p.gender||'-')} · ${escapeHtml(p.age||'-')}</span></div><div style="font-size: 13px; color: var(--ink-soft);">${escapeHtml(p.intro || '')}</div><div style="font-size: 11px; color: var(--ink-mute); font-family: var(--serif-en); letter-spacing: 0.05em; margin-top: 4px;">${escapeHtml(p.region || '-')} · ${escapeHtml(p.phone || '-')} · ${(p.days||[]).join(', ')}</div><div style="font-size: 11px; color: var(--ink-mute); margin-top: 2px;">${escapeHtml(extra)}${(p.genres||[]).length ? ' · 🎵 ' + escapeHtml((p.genres||[]).join(', ')) : ''}</div></div><div style="font-size: 11px; color: var(--ink-mute); font-family: var(--serif-en);">${time}</div><button class="admin-btn danger" onclick="adminDeleteProfile('${p.id}')">삭제</button></div>`;
+      }).join('');
+    }
+    
+    const requestList = document.getElementById('adminRequestList');
+    if (requestsCache.length === 0) {
+      requestList.innerHTML = '<div class="empty-state"><div class="empty-state-title">아직 요청이 없습니다</div></div>';
+    } else {
+      requestList.innerHTML = requestsCache.slice().sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map(r => {
+        const from = profilesCache.find(p => p.id === r.fromId);
+        const to = profilesCache.find(p => p.id === r.toId);
+        const statusBadge = r.status === 'pending' ? '<span class="req-status req-status-pending">대기</span>' : r.status === 'accepted' ? '<span class="req-status req-status-accepted">성사</span>' : '<span class="req-status req-status-rejected">다음 기회에</span>';
+        const time = new Date(r.createdAt).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
+        return `<div class="admin-table-row" style="grid-template-columns: 1fr auto auto;"><div><div style="font-weight: 500;">${escapeHtml(from ? from.nickname : '?')} <span style="color: var(--ink-mute); font-weight: 400;">→</span> ${escapeHtml(to ? to.nickname : '?')}</div>${r.message ? `<div style="font-size: 13px; color: var(--ink-soft); margin-top: 4px; font-style: italic;">"${escapeHtml(r.message)}"</div>` : ''}<div style="font-size: 11px; color: var(--ink-mute); font-family: var(--serif-en); margin-top: 4px;">${time}</div></div><div>${statusBadge}</div><button class="admin-btn danger" onclick="adminDeleteRequest('${r.id}')">삭제</button></div>`;
+      }).join('');
+    }
+  }
+  
+  async function adminDeleteProfile(id) {
+    if (!confirm('이 프로필을 삭제하시겠어요?')) return;
+    showLoading('Deleting');
+    try { await deleteProfileDb(id); await refreshAdminData(); hideLoading(); }
+    catch (err) { hideLoading(); showToast('삭제 실패'); }
+  }
+  async function adminDeleteRequest(id) {
+    if (!confirm('이 요청을 삭제하시겠어요?')) return;
+    showLoading('Deleting');
+    try { await deleteRequestDb(id); await refreshAdminData(); hideLoading(); }
+    catch (err) { hideLoading(); showToast('삭제 실패'); }
+  }
+  async function clearAll() {
+    if (!confirm('모든 프로필 및 요청을 삭제하시겠어요?\n이 작업은 되돌릴 수 없습니다.')) return;
+    if (!confirm('정말로 모든 데이터를 삭제하시겠어요?\n마지막 확인입니다.')) return;
+    showLoading('Clearing');
+    try {
+      for (const r of requestsCache) await deleteRequestDb(r.id);
+      for (const p of profilesCache) await deleteProfileDb(p.id);
+      await refreshAdminData();
+      hideLoading();
+    } catch (err) { hideLoading(); showToast('삭제 실패'); }
+  }
+  
+  function exportCSV() {
+    if (profilesCache.length === 0) { alert('내보낼 데이터가 없습니다.'); return; }
+    const headers = ['등록시각', '닉네임', '성별', '나이대', '참가일', '출발지역', '동행이유', '흡연', '음주', 'MBTI', '음악장르', '자기소개', '전화번호', '연락처'];
+    const rows = profilesCache.map(p => [
+      new Date(p.createdAt).toLocaleString('ko-KR'),
+      p.nickname || '', p.gender || '', p.age || '',
+      (p.days || []).join(' / '), p.region || '', p.reason || '',
+      p.smoking || '', p.drinking || '', p.mbti || '',
+      (p.genres || []).join(' / '), p.intro || '', p.phone || '',
+      (p.contacts || []).map(c => `${c.type}:${c.value}`).join(' | ')
+    ]);
+    const csv = '\ufeff' + [headers, ...rows].map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `airhouse_profiles_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('requestModal').classList.contains('active')) closeRequestModal();
+      else if (document.getElementById('profileModal').classList.contains('active')) closeProfileModal();
+      else if (document.getElementById('adminOverlay').classList.contains('active')) {
+        if (!document.getElementById('adminDash').classList.contains('active')) closeAdmin();
+      }
+    }
+  });
+  
+  // ============ INIT ============
+  (async function init() {
+    if (!isConfigured) return;
+    await restoreSession();
+    if (currentUser) await goToFeed();
+  })();
+</script>
+</body>
+</html>
