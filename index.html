@@ -99,6 +99,16 @@
   .contact-remove:hover { border-color: var(--error); color: var(--error); }
   .add-contact-btn { background: transparent; border: 1px dashed var(--line); color: var(--ink-soft); padding: 12px; width: 100%; cursor: pointer; font-family: inherit; font-size: 13px; border-radius: 2px; transition: all 0.2s; margin-top: 6px; }
   .add-contact-btn:hover { border-color: var(--accent-soft); color: var(--ink); }
+  .contact-section { padding: 20px; border-radius: 2px; margin-bottom: 16px; border: 1px solid; }
+  .contact-section-private { background: rgba(160,69,69,0.04); border-color: rgba(160,69,69,0.25); }
+  .contact-section-public { background: rgba(90,107,74,0.04); border-color: rgba(90,107,74,0.25); }
+  .contact-section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+  .contact-section-badge { font-family: var(--serif-en); font-size: 11px; padding: 3px 9px; border-radius: 2px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+  .badge-private { background: var(--error); color: var(--paper); }
+  .badge-public { background: var(--moss); color: var(--paper); }
+  .contact-section-title { font-family: var(--serif-ko); font-size: 16px; font-weight: 500; color: var(--ink); }
+  .contact-section-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.7; margin-bottom: 14px; }
+  .contact-section-desc strong { color: var(--ink); font-weight: 500; }
   .btn-row { display: flex; gap: 10px; margin-top: 36px; }
   .btn { padding: 16px 28px; border: 1px solid var(--ink); border-radius: 2px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; font-family: inherit; letter-spacing: 0.05em; background: var(--ink); color: var(--paper); }
   .btn:disabled { opacity: 0.3; cursor: not-allowed; }
@@ -133,6 +143,15 @@
   .tab-content { display: none; }
   .tab-content.active { display: block; animation: fadeIn 0.4s; }
   .filter-bar-feed { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+  .filter-stack { margin-bottom: 24px; }
+  .filter-stack .filter-bar-feed { margin-bottom: 10px; }
+  .filter-stack .filter-bar-feed:last-of-type { margin-bottom: 0; }
+  .filter-stack .filter-label { min-width: 60px; }
+  .filter-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line-soft); gap: 12px; flex-wrap: wrap; }
+  .filter-summary { font-family: var(--sans); font-size: 12px; color: var(--ink-mute); flex: 1; min-width: 0; }
+  .filter-summary strong { color: var(--moss); font-weight: 500; }
+  .filter-reset { background: transparent; border: 1px solid var(--line); color: var(--ink-mute); padding: 6px 12px; font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
+  .filter-reset:hover { border-color: var(--error); color: var(--error); }
   .filter-chip-group { display: flex; gap: 8px; flex-wrap: wrap; }
   .filter-label { font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; margin-right: 8px; }
   .filter-chip { background: var(--paper); border: 1px solid var(--line); padding: 6px 14px; font-size: 13px; cursor: pointer; border-radius: 2px; transition: all 0.2s; font-family: inherit; color: var(--ink); }
@@ -147,12 +166,12 @@
   .profile-avatar-lg { width: 96px; height: 96px; font-size: 32px; }
   .profile-meta { flex: 1; min-width: 0; }
   .profile-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-  .tag { font-family: var(--serif-en); font-size: 10px; padding: 3px 8px; border-radius: 2px; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid; display: inline-flex; align-items: center; line-height: 1.4; }
+  .tag { font-family: var(--serif-en); font-size: 11px; padding: 4px 10px; border-radius: 2px; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid; display: inline-flex; align-items: center; line-height: 1.4; }
   .tag-gender { border-color: var(--moss); color: var(--moss); }
   .tag-age { border-color: var(--earth); color: var(--earth); }
   .tag-day { border-color: var(--accent-soft); color: var(--accent-soft); }
-  .tag-reason { border-color: var(--earth); color: var(--earth); background: rgba(139,111,71,0.04); }
-  .tag-lifestyle { border-color: var(--ink-mute); color: var(--ink-soft); font-family: inherit; font-size: 11px; letter-spacing: 0; text-transform: none; }
+  .tag-reason { border-color: var(--earth); color: var(--earth); background: rgba(139,111,71,0.04); font-family: inherit; font-size: 12px; letter-spacing: 0; text-transform: none; }
+  .tag-lifestyle { border-color: var(--ink-mute); color: var(--ink-soft); font-family: inherit; font-size: 12px; letter-spacing: 0; text-transform: none; }
   .profile-card-intro { font-family: var(--serif-ko); font-size: 15px; line-height: 1.6; color: var(--ink); flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
   .profile-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--line-soft); font-size: 12px; color: var(--ink-mute); font-family: var(--serif-en); letter-spacing: 0.05em; gap: 8px; }
   .profile-card-region { color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -307,9 +326,9 @@
     .profile-card { padding: 18px; gap: 12px; }
     .profile-card-header { gap: 10px; }
     .profile-avatar { width: 48px; height: 48px; font-size: 17px; }
-    .profile-tags { gap: 4px; }
-    .tag { padding: 3px 7px; font-size: 10px; }
-    .tag-lifestyle { font-size: 10px; padding: 3px 7px; }
+    .profile-tags { gap: 5px; }
+    .tag { padding: 3px 9px; font-size: 10.5px; }
+    .tag-lifestyle, .tag-reason { font-size: 11.5px; padding: 3px 9px; }
     .profile-card-intro { font-size: 14px; -webkit-line-clamp: 2; }
     .profile-card-footer { font-size: 11px; }
 
@@ -416,7 +435,7 @@
       <div class="error-msg" id="loginErrorMsg" style="margin-bottom: 16px;">등록된 프로필을 찾을 수 없습니다.</div>
       <div class="auth-form-group">
         <label>전화번호</label>
-        <input type="tel" class="input" id="loginPhone" placeholder="010-0000-0000" onkeydown="if(event.key==='Enter')doUserLogin()">
+        <input type="tel" inputmode="numeric" class="input" id="loginPhone" placeholder="01012345678" maxlength="11" oninput="formatPhoneInput(this)" onkeydown="if(event.key==='Enter')doUserLogin()">
       </div>
       <div style="display: flex; gap: 8px; margin-top: 24px;">
         <button class="btn btn-ghost" onclick="goHome()" style="flex: 1;">취소</button>
@@ -627,18 +646,34 @@
     <div class="step" data-step="13">
       <div class="step-num">Question 13 · 마지막</div>
       <h2 class="step-title">연락처를 알려주세요</h2>
-      <p class="step-desc"><strong style="color: var(--ink);">전화번호는 로그인용으로 사용되며 공개되지 않습니다.</strong><br>오픈 채널은 동행 요청이 수락되었을 때 상대방에게 공개돼요.</p>
-      <div style="margin-bottom: 32px;">
-        <label style="display: block; font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; margin-bottom: 8px;">로그인용 전화번호 <span style="color: var(--error);">*</span></label>
-        <input type="tel" class="input" id="phone" placeholder="010-0000-0000" oninput="checkPhone()">
-        <div class="error-msg" id="phoneError">올바른 전화번호 형식이 아닙니다.</div>
+      <p class="step-desc">로그인용과 공개용은 다른 정보예요. 헷갈리지 않게 살펴주세요.</p>
+
+      <div class="contact-section contact-section-private">
+        <div class="contact-section-header">
+          <span class="contact-section-badge badge-private">🔒 비공개</span>
+          <span class="contact-section-title">로그인용 전화번호</span>
+        </div>
+        <p class="contact-section-desc">
+          오직 로그인 용도로만 사용되며, <strong>다른 사용자에게 절대 노출되지 않아요.</strong>
+        </p>
+        <input type="tel" inputmode="numeric" class="input" id="phone" placeholder="01012345678" maxlength="11" oninput="formatPhoneInput(this); checkPhone();">
+        <div class="error-msg" id="phoneError">전화번호는 숫자 10~11자리로 입력해주세요.</div>
         <div class="error-msg" id="phoneDupError">이미 등록된 전화번호입니다. 로그인해주세요.</div>
       </div>
-      <div>
-        <label style="display: block; font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; margin-bottom: 8px;">공개 연락 채널 <span style="color: var(--error);">*</span> <span style="color: var(--ink-mute); text-transform: none; letter-spacing: 0; font-family: var(--sans); font-size: 12px; margin-left: 8px;">수락 시 공개 · 1개 이상</span></label>
+
+      <div class="contact-section contact-section-public">
+        <div class="contact-section-header">
+          <span class="contact-section-badge badge-public">👋 공개</span>
+          <span class="contact-section-title">공개 연락 채널 <span style="color: var(--ink-mute); font-weight: 400; font-size: 13px;">· 1개 이상</span></span>
+        </div>
+        <p class="contact-section-desc">
+          동행 요청이 <strong>수락되었을 때만</strong> 상대방에게 공개되는 채널이에요.<br>
+          <span style="color: var(--ink-mute);">카톡 · 인스타그램 등 자유롭게 추가해주세요. (전화번호 제외)</span>
+        </p>
         <div class="contacts-list" id="contactsList"></div>
         <button class="add-contact-btn" onclick="addContactRow()">＋ 연락처 추가</button>
       </div>
+
       <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="submitForm()" id="finalSubmitBtn">프로필 등록하기 →</button></div>
     </div>
   </section>
@@ -824,13 +859,39 @@
       <button class="feed-tab" data-tab="me" onclick="switchTab('me')">내 프로필</button>
     </div>
     <div class="tab-content active" id="tab-discover">
-      <div class="filter-bar-feed">
-        <span class="filter-label">By day</span>
-        <div class="filter-chip-group">
-          <button class="filter-chip active" data-filter="all" onclick="setDiscoverFilter('all')">전체</button>
-          <button class="filter-chip" data-filter="23일" onclick="setDiscoverFilter('23일')">23일 토</button>
-          <button class="filter-chip" data-filter="24일" onclick="setDiscoverFilter('24일')">24일 일</button>
-          <button class="filter-chip" data-filter="25일" onclick="setDiscoverFilter('25일')">25일 월</button>
+      <div class="filter-stack">
+        <div class="filter-bar-feed">
+          <span class="filter-label">By day</span>
+          <div class="filter-chip-group">
+            <button class="filter-chip active" data-day="all" onclick="toggleDayFilter('all')">전체</button>
+            <button class="filter-chip" data-day="23일" onclick="toggleDayFilter('23일')">23일 토</button>
+            <button class="filter-chip" data-day="24일" onclick="toggleDayFilter('24일')">24일 일</button>
+            <button class="filter-chip" data-day="25일" onclick="toggleDayFilter('25일')">25일 월</button>
+          </div>
+        </div>
+        <div class="filter-bar-feed">
+          <span class="filter-label">Gender</span>
+          <div class="filter-chip-group">
+            <button class="filter-chip" data-gender="여성" onclick="toggleGenderFilter('여성')">여성</button>
+            <button class="filter-chip" data-gender="남성" onclick="toggleGenderFilter('남성')">남성</button>
+          </div>
+        </div>
+        <div class="filter-bar-feed">
+          <span class="filter-label">Age</span>
+          <div class="filter-chip-group">
+            <button class="filter-chip" data-age="10대" onclick="toggleAgeFilter('10대')">10대</button>
+            <button class="filter-chip" data-age="20대 초반" onclick="toggleAgeFilter('20대 초반')">20대 초반</button>
+            <button class="filter-chip" data-age="20대 후반" onclick="toggleAgeFilter('20대 후반')">20대 후반</button>
+            <button class="filter-chip" data-age="30대 초반" onclick="toggleAgeFilter('30대 초반')">30대 초반</button>
+            <button class="filter-chip" data-age="30대 후반" onclick="toggleAgeFilter('30대 후반')">30대 후반</button>
+            <button class="filter-chip" data-age="40대" onclick="toggleAgeFilter('40대')">40대</button>
+            <button class="filter-chip" data-age="50대" onclick="toggleAgeFilter('50대')">50대</button>
+            <button class="filter-chip" data-age="60대 이상" onclick="toggleAgeFilter('60대 이상')">60대 이상</button>
+          </div>
+        </div>
+        <div class="filter-meta">
+          <span class="filter-summary" id="filterSummary"></span>
+          <button class="filter-reset" id="filterResetBtn" onclick="resetAllFilters()" style="display:none;">필터 초기화</button>
         </div>
       </div>
       <div id="discoverGrid"></div>
@@ -913,10 +974,11 @@
     { value: 'kakao', label: '카카오톡 ID' },
     { value: 'instagram', label: '인스타그램' },
     { value: 'twitter', label: '트위터(X)' },
-    { value: 'phone', label: '전화번호' },
     { value: 'email', label: '이메일' },
     { value: 'other', label: '기타' }
   ];
+  // 옛 데이터에 phone이 들어있을 수 있어 표시용 라벨은 유지
+  const CONTACT_TYPE_LABELS = { kakao: '카카오톡 ID', instagram: '인스타그램', twitter: '트위터(X)', phone: '전화번호', email: '이메일', other: '기타' };
   
   let sb = null;
   const isConfigured = SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY_HERE' && SUPABASE_URL && SUPABASE_ANON_KEY;
@@ -931,7 +993,7 @@
   let formData = { days: [], photo: null, contacts: [], genres: [], reason: [] };
   let editData = {};
   let currentUser = null;
-  let discoverFilter = 'all';
+  let discoverFilter = { day: 'all', genders: [], ages: [] };
   let pendingRequestTargetId = null;
   let profilesCache = [];
   let requestsCache = [];
@@ -1139,8 +1201,8 @@
     const raw = document.getElementById('loginPhone').value.trim();
     const phone = normalizePhone(raw);
     const errEl = document.getElementById('loginErrorMsg');
-    if (phone.length < 9) {
-      errEl.textContent = '전화번호 형식을 확인해주세요.';
+    if (phone.length < 10 || phone.length > 11) {
+      errEl.textContent = '전화번호는 숫자 10~11자리로 입력해주세요.';
       errEl.classList.add('show');
       return;
     }
@@ -1243,26 +1305,32 @@
     }
   }
   
+  // 전화번호 입력 마스크: 숫자만 허용, 최대 11자리
+  function formatPhoneInput(el) {
+    const onlyDigits = el.value.replace(/[^0-9]/g, '').slice(0, 11);
+    if (el.value !== onlyDigits) el.value = onlyDigits;
+  }
+  
   async function checkPhone() {
-    const raw = document.getElementById('phone').value.trim();
+    const raw = document.getElementById('phone').value;
     const cleaned = normalizePhone(raw);
     const errEl = document.getElementById('phoneError');
     const dupEl = document.getElementById('phoneDupError');
     dupEl.classList.remove('show');
     
-    if (cleaned.length >= 9 && cleaned.length <= 15) {
+    if (cleaned.length >= 10 && cleaned.length <= 11) {
       const dup = await findProfileByPhone(cleaned);
       if (dup) {
         delete formData.phone;
         errEl.classList.remove('show');
         dupEl.classList.add('show');
       } else {
-        formData.phone = raw;
+        formData.phone = cleaned;
         errEl.classList.remove('show');
       }
-    } else if (raw.length > 0) {
+    } else if (cleaned.length > 0) {
       delete formData.phone;
-      if (cleaned.length > 5) errEl.classList.add('show');
+      if (cleaned.length >= 5) errEl.classList.add('show');
       else errEl.classList.remove('show');
     } else {
       delete formData.phone;
@@ -1361,14 +1429,33 @@
     validateFinalStep();
   }
   function getContactPlaceholder(type) {
-    return { kakao: '카카오톡 ID', instagram: '@your_handle', twitter: '@your_handle', phone: '010-0000-0000', email: 'you@example.com', other: '자유롭게 입력' }[type] || '';
+    return { kakao: '카카오톡 ID', instagram: '@your_handle', twitter: '@your_handle', phone: '(전화번호는 사용 불가)', email: 'you@example.com', other: '자유롭게 입력' }[type] || '';
   }
   function updateContactType(idx, type) { formData.contacts[idx].type = type; renderContacts(); }
-  function updateContactValue(idx, value) { formData.contacts[idx].value = value; validateFinalStep(); }
+  function updateContactValue(idx, value) {
+    formData.contacts[idx].value = value;
+    validateFinalStep();
+  }
   function removeContactRow(idx) { formData.contacts.splice(idx, 1); if (formData.contacts.length === 0) addContactRow(); else renderContacts(); }
+  
+  // 입력값이 전화번호로 의심되는지 (숫자만 추출했을 때 9자리 이상이고 영문자가 거의 없음)
+  function looksLikePhone(value) {
+    if (!value) return false;
+    const digits = value.replace(/[^0-9]/g, '');
+    const letters = value.replace(/[^a-zA-Z]/g, '');
+    return digits.length >= 9 && letters.length <= 2;
+  }
   
   async function submitForm() {
     if (!sb) { showToast('Supabase 설정이 필요합니다.'); return; }
+    
+    // 공개 연락처에 전화번호 들어가 있는지 확인
+    const validContacts = formData.contacts.filter(c => c.type && c.value && c.value.trim());
+    const phoneInPublic = validContacts.find(c => c.type === 'phone' || looksLikePhone(c.value));
+    if (phoneInPublic) {
+      showToast('공개 연락처에는 전화번호를 입력할 수 없어요.');
+      return;
+    }
     
     const profile = {
       id: 'prof_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
@@ -1378,7 +1465,7 @@
       smoking: formData.smoking, drinking: formData.drinking,
       mbti: formData.mbti, genres: formData.genres,
       intro: formData.intro, phone: formData.phone,
-      contacts: formData.contacts.filter(c => c.type && c.value && c.value.trim())
+      contacts: validContacts
     };
     
     showLoading('Saving profile');
@@ -1574,6 +1661,8 @@
     
     const validContacts = editData.contacts.filter(c => c.type && c.value && c.value.trim());
     if (validContacts.length === 0) { showToast('공개 연락처를 1개 이상 추가해주세요.'); return; }
+    const phoneInPublic = validContacts.find(c => c.type === 'phone' || looksLikePhone(c.value));
+    if (phoneInPublic) { showToast('공개 연락처에는 전화번호를 입력할 수 없어요.'); return; }
     
     showLoading('Saving');
     try {
@@ -1624,20 +1713,65 @@
     else if (tab === 'me') renderMe();
   }
   
-  function setDiscoverFilter(f) {
-    discoverFilter = f;
-    document.querySelectorAll('#tab-discover .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.filter === f));
+  function toggleDayFilter(day) {
+    discoverFilter.day = day;
+    document.querySelectorAll('#tab-discover .filter-chip[data-day]').forEach(c => c.classList.toggle('active', c.dataset.day === day));
+    updateFilterMeta();
     renderDiscover();
+  }
+  function toggleGenderFilter(g) {
+    const idx = discoverFilter.genders.indexOf(g);
+    if (idx >= 0) discoverFilter.genders.splice(idx, 1);
+    else discoverFilter.genders.push(g);
+    document.querySelector(`#tab-discover .filter-chip[data-gender="${g}"]`).classList.toggle('active');
+    updateFilterMeta();
+    renderDiscover();
+  }
+  function toggleAgeFilter(a) {
+    const idx = discoverFilter.ages.indexOf(a);
+    if (idx >= 0) discoverFilter.ages.splice(idx, 1);
+    else discoverFilter.ages.push(a);
+    document.querySelector(`#tab-discover .filter-chip[data-age="${a}"]`).classList.toggle('active');
+    updateFilterMeta();
+    renderDiscover();
+  }
+  function resetAllFilters() {
+    discoverFilter = { day: 'all', genders: [], ages: [] };
+    document.querySelectorAll('#tab-discover .filter-chip').forEach(c => c.classList.remove('active'));
+    document.querySelector('#tab-discover .filter-chip[data-day="all"]').classList.add('active');
+    updateFilterMeta();
+    renderDiscover();
+  }
+  function updateFilterMeta() {
+    const parts = [];
+    if (discoverFilter.day !== 'all') parts.push(discoverFilter.day);
+    if (discoverFilter.genders.length) parts.push(discoverFilter.genders.join('·'));
+    if (discoverFilter.ages.length) parts.push(discoverFilter.ages.join('·'));
+    const hasFilter = parts.length > 0;
+    document.getElementById('filterResetBtn').style.display = hasFilter ? 'inline-block' : 'none';
+    document.getElementById('filterSummary').innerHTML = hasFilter ? `<strong>${parts.join(' · ')}</strong>` : '';
   }
   
   function renderDiscover() {
     let others = profilesCache.filter(p => p.id !== currentUser.id);
-    if (discoverFilter !== 'all') {
-      others = others.filter(p => (p.days || []).some(d => d && d.includes(discoverFilter)));
+    // day 필터 (단일)
+    if (discoverFilter.day !== 'all') {
+      others = others.filter(p => (p.days || []).some(d => d && d.includes(discoverFilter.day)));
+    }
+    // gender 필터 (OR: 선택된 성별 중 하나라도 일치)
+    if (discoverFilter.genders.length > 0) {
+      others = others.filter(p => discoverFilter.genders.includes(p.gender));
+    }
+    // age 필터 (OR: 선택된 나이대 중 하나라도 일치)
+    if (discoverFilter.ages.length > 0) {
+      others = others.filter(p => discoverFilter.ages.includes(p.age));
     }
     const grid = document.getElementById('discoverGrid');
     if (others.length === 0) {
-      grid.innerHTML = `<div class="empty-state"><div class="empty-state-title">아직 다른 프로필이 없어요</div><div class="empty-state-desc">새로운 사람이 등록되면 여기에 표시됩니다.</div></div>`;
+      const isFiltered = discoverFilter.day !== 'all' || discoverFilter.genders.length > 0 || discoverFilter.ages.length > 0;
+      grid.innerHTML = isFiltered
+        ? `<div class="empty-state"><div class="empty-state-title">조건에 맞는 동행이 없어요</div><div class="empty-state-desc">필터를 조금 풀어보시거나 초기화해보세요.</div></div>`
+        : `<div class="empty-state"><div class="empty-state-title">아직 다른 프로필이 없어요</div><div class="empty-state-desc">새로운 사람이 등록되면 여기에 표시됩니다.</div></div>`;
       return;
     }
     grid.innerHTML = '<div class="profile-grid">' + others.map(renderProfileCard).join('') + '</div>';
@@ -1646,7 +1780,18 @@
   function renderProfileCard(p) {
     const dayTags = (p.days || []).slice(0,3).map(d => `<span class="tag tag-day">${escapeHtml(d.replace(/\s*\([^)]*\)/,''))}</span>`).join('');
     const reasonArr = normalizeReason(p.reason);
-    const reasonShort = (r) => r.replace(/같이\s*/g, '').replace(/\s*사람$/, '').replace(/\s*고\s*싶어서$/, '').replace(/\s*싶어서$/, '');
+    // 태그 표시용 축약 매핑 (의미를 자연스럽게 유지)
+    const reasonShortMap = {
+      '같이 이동할 사람': '같이 이동할',
+      '같이 공연 볼 사람': '같이 공연 볼',
+      '같이 밥 · 술 먹을 사람': '같이 밥 · 술 먹을',
+      '사진 · 영상 같이 찍을 사람': '사진 · 영상 같이 찍을',
+      '숙소 같이 잡을 사람': '숙소 같이 잡을',
+      '페스티벌 처음이라 같이 갈 사람': '처음이라 같이 갈',
+      '새로운 사람 만나고 싶어서': '새로운 사람',
+      '그냥 함께하면 즐거우니까!': '함께하면 즐거움'
+    };
+    const reasonShort = (r) => reasonShortMap[r] || r.replace(/\s*사람$/, '').replace(/!$/, '');
     const reasonTags = reasonArr.slice(0, 3).map(r => `<span class="tag tag-reason">${escapeHtml(reasonShort(r))}</span>`).join('');
     const moreReason = reasonArr.length > 3 ? `<span class="tag tag-reason" style="opacity:0.6;">+${reasonArr.length - 3}</span>` : '';
     const avatar = p.photo
@@ -1699,7 +1844,7 @@
     let contactSection = '';
     if (isAccepted) {
       const items = (p.contacts || []).map(c => {
-        const typeLabel = (CONTACT_TYPES.find(t => t.value === c.type) || {label: c.type}).label;
+        const typeLabel = CONTACT_TYPE_LABELS[c.type] || c.type;
         return `<div class="contact-item"><span class="contact-item-type">${escapeHtml(typeLabel)}</span><span><span class="contact-item-value">${escapeHtml(c.value)}</span><button class="copy-btn" onclick="copyText('${escapeHtml(c.value).replace(/'/g,"\\'")}')">Copy</button></span></div>`;
       }).join('');
       contactSection = `<div class="contact-reveal-box"><div class="contact-reveal-title">✓ 연락처 공개</div>${items}</div>`;
@@ -1853,7 +1998,7 @@
     const reasonTags = reasonArr.map(r => `<span class="tag tag-reason">${escapeHtml(r)}</span>`).join('');
     const avatar = p.photo ? `<div class="profile-avatar profile-avatar-lg"><img src="${p.photo}" alt=""></div>` : `<div class="profile-avatar profile-avatar-lg">${escapeHtml((p.nickname || '·')[0])}</div>`;
     const contactItems = (p.contacts || []).map(c => {
-      const typeLabel = (CONTACT_TYPES.find(t => t.value === c.type) || {label: c.type}).label;
+      const typeLabel = CONTACT_TYPE_LABELS[c.type] || c.type;
       return `<div class="contact-item"><span class="contact-item-type">${escapeHtml(typeLabel)}</span><span class="contact-item-value">${escapeHtml(c.value)}</span></div>`;
     }).join('');
     
