@@ -8,6 +8,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Noto+Serif+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Vercel Analytics (페이지뷰 + 커스텀 이벤트) -->
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<!-- Vercel Speed Insights (성능 측정) -->
+<script>
+  window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
@@ -44,6 +54,28 @@
   .home-title .em { font-family: var(--serif-en); font-style: italic; color: var(--moss); }
   .home-desc { font-size: 16px; line-height: 1.9; color: var(--ink-soft); max-width: 520px; margin: 0 auto 56px; font-weight: 300; }
   .home-cta { display: flex; gap: 12px; max-width: 440px; margin: 0 auto; }
+  .home-browse-link { display: inline-block; margin: 20px auto 0; background: none; border: none; color: var(--ink-mute); font-family: inherit; font-size: 14px; cursor: pointer; padding: 8px 16px; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; transition: all 0.2s; }
+  .home-browse-link:hover { color: var(--moss); text-decoration-color: var(--moss); }
+  .guest-banner { background: var(--paper); border-bottom: 1px solid var(--line); padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .guest-banner-text { font-size: 13px; color: var(--ink-soft); flex: 1; min-width: 0; }
+  .guest-banner-text strong { color: var(--ink); font-weight: 500; }
+  .guest-banner-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .guest-banner-btn { padding: 8px 14px; font-family: inherit; font-size: 12px; border-radius: 2px; cursor: pointer; border: 1px solid; transition: all 0.2s; letter-spacing: 0.05em; }
+  .guest-banner-btn-primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .guest-banner-btn-primary:hover { background: var(--accent); border-color: var(--accent); }
+  .guest-banner-btn-ghost { background: transparent; color: var(--ink-soft); border-color: var(--line); }
+  .guest-banner-btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+  .profile-card-photo-locked { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-soft); color: var(--ink-mute); gap: 4px; }
+  .profile-card-photo-locked svg { width: 18px; height: 18px; stroke: var(--ink-mute); fill: none; stroke-width: 1.5; }
+  .profile-card-photo-locked-text { font-family: var(--serif-en); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .profile-card.guest-card { position: relative; }
+  .profile-card.guest-card::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
+  .guest-mode .feed-tabs .feed-tab { border-right: none !important; border-top: none !important; }
+  @media (max-width: 640px) {
+    .guest-banner { padding: 12px 16px; }
+    .guest-banner-text { font-size: 12px; }
+    .guest-banner-btn { padding: 7px 11px; font-size: 11px; }
+  }
   .festival-info { max-width: 800px; margin: 80px auto 0; padding: 0 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
   .festival-info-item { background: var(--bg); padding: 24px 16px; text-align: center; }
   .festival-info-label { font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.25em; color: var(--ink-mute); text-transform: uppercase; margin-bottom: 8px; }
@@ -411,9 +443,10 @@
     <h1 class="home-title"><span class="em">THE AIR HOUSE</span><br>동행 매칭</h1>
     <p class="home-desc">혼자도 좋지만, 취향이 통하는 사람과 함께라면<br>페스티벌의 모든 순간이 더 깊어집니다.<br>프로필을 등록하고, 함께할 사람을 찾아보세요.</p>
     <div class="home-cta">
-      <button class="btn btn-ghost" onclick="goToPage('login')" style="flex:1;">로그인</button>
-      <button class="btn btn-primary" onclick="goToPage('register')" style="flex:1;">프로필 등록</button>
+      <button class="btn btn-ghost" onclick="track('home_login_click'); goToPage('login')" style="flex:1;">로그인</button>
+      <button class="btn btn-primary" onclick="track('home_register_click'); goToPage('register')" style="flex:1;">프로필 등록</button>
     </div>
+    <button class="home-browse-link" onclick="track('home_browse_click'); enterGuestMode()">먼저 둘러보기 →</button>
   </section>
   <div class="festival-info">
     <div class="festival-info-item"><div class="festival-info-label">When</div><div class="festival-info-value">2026.05.23 — 05.25</div></div>
@@ -850,13 +883,22 @@
 </div>
 
 <div class="page" id="page-feed">
+  <div class="guest-banner" id="guestBanner" style="display:none;">
+    <div class="guest-banner-text">
+      <strong>둘러보기 모드</strong>예요. 동행을 요청하려면 프로필을 먼저 등록해주세요.
+    </div>
+    <div class="guest-banner-actions">
+      <button class="guest-banner-btn guest-banner-btn-ghost" onclick="track('guest_banner_login_click'); goToPage('login')">로그인</button>
+      <button class="guest-banner-btn guest-banner-btn-primary" onclick="track('guest_banner_register_click'); goToPage('register')">프로필 등록 →</button>
+    </div>
+  </div>
   <div class="feed-wrap">
     <div class="feed-tabs">
       <button class="feed-tab active" data-tab="discover" onclick="switchTab('discover')">동행 찾기</button>
-      <button class="feed-tab" data-tab="received" onclick="switchTab('received')">받은 요청 <span class="tab-count" id="countReceived">0</span></button>
-      <button class="feed-tab" data-tab="sent" onclick="switchTab('sent')">보낸 요청 <span class="tab-count" id="countSent">0</span></button>
-      <button class="feed-tab" data-tab="matched" onclick="switchTab('matched')">성사된 동행 <span class="tab-count" id="countMatched">0</span></button>
-      <button class="feed-tab" data-tab="me" onclick="switchTab('me')">내 프로필</button>
+      <button class="feed-tab guest-hide" data-tab="received" onclick="switchTab('received')">받은 요청 <span class="tab-count" id="countReceived">0</span></button>
+      <button class="feed-tab guest-hide" data-tab="sent" onclick="switchTab('sent')">보낸 요청 <span class="tab-count" id="countSent">0</span></button>
+      <button class="feed-tab guest-hide" data-tab="matched" onclick="switchTab('matched')">성사된 동행 <span class="tab-count" id="countMatched">0</span></button>
+      <button class="feed-tab guest-hide" data-tab="me" onclick="switchTab('me')">내 프로필</button>
     </div>
     <div class="tab-content active" id="tab-discover">
       <div class="filter-stack">
@@ -998,6 +1040,7 @@
   let profilesCache = [];
   let requestsCache = [];
   let composing = false;
+  let isGuest = false;
   
   function dbToProfile(row) {
     return {
@@ -1101,6 +1144,12 @@
     document.getElementById('loadingText').textContent = text || 'Loading';
     document.getElementById('loadingOverlay').classList.add('active');
   }
+  // Vercel Analytics 커스텀 이벤트 추적 (실패해도 앱에 영향 없도록)
+  function track(eventName, props) {
+    try {
+      if (window.va) window.va('event', { name: eventName, data: props || {} });
+    } catch (e) { /* ignore */ }
+  }
   function hideLoading() {
     document.getElementById('loadingOverlay').classList.remove('active');
   }
@@ -1153,6 +1202,11 @@
   }
   
   function goToPage(page) {
+    // 홈/로그인/등록 페이지로 가면 게스트 모드 해제
+    if (page === 'home' || page === 'login' || page === 'register') {
+      isGuest = false;
+      applyGuestUI();
+    }
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1169,7 +1223,33 @@
   }
   function handleBrandClick() {
     if (currentUser) goToFeed();
+    else if (isGuest) { isGuest = false; applyGuestUI(); goToPage('home'); }
     else goToPage('home');
+  }
+  // 게스트(비회원) 둘러보기 진입
+  async function enterGuestMode() {
+    isGuest = true;
+    currentUser = null;
+    applyGuestUI();
+    track('guest_mode_enter');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-feed').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    showLoading('Loading');
+    await fetchProfiles();
+    hideLoading();
+    // 게스트는 discover 탭 고정
+    document.querySelectorAll('.feed-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'discover'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-discover'));
+    renderDiscover();
+  }
+  // 게스트 모드용 UI 토글 (배너 + 회원 전용 탭 숨김)
+  function applyGuestUI() {
+    document.body.classList.toggle('guest-mode', isGuest);
+    document.getElementById('guestBanner').style.display = isGuest ? 'flex' : 'none';
+    document.querySelectorAll('.guest-hide').forEach(el => {
+      el.style.display = isGuest ? 'none' : '';
+    });
   }
   async function goToFeed() {
     if (!currentUser) {
@@ -1182,6 +1262,8 @@
       }
       if (!currentUser) { goToPage('home'); return; }
     }
+    isGuest = false;
+    applyGuestUI();
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-feed').classList.add('active');
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1219,6 +1301,7 @@
     updateTopbar();
     await goToFeed();
     showToast('환영합니다, ' + profile.nickname + '님!');
+    track('user_login_success');
   }
   
   async function restoreSession() {
@@ -1476,6 +1559,7 @@
       updateTopbar();
       hideLoading();
       goToSuccess('프로필이 등록되었습니다', '이제 다른 사람들의 프로필을 둘러보고<br>마음에 드는 사람에게 동행을 요청해보세요.');
+      track('profile_register_success', { days_count: (profile.days || []).length, reason_count: (profile.reason || []).length });
     } catch (err) {
       hideLoading();
       console.error(err);
@@ -1753,7 +1837,8 @@
   }
   
   function renderDiscover() {
-    let others = profilesCache.filter(p => p.id !== currentUser.id);
+    // 게스트 모드일 때는 currentUser가 없으니 본인 제외 필터 생략
+    let others = isGuest ? profilesCache.slice() : profilesCache.filter(p => p.id !== currentUser.id);
     // day 필터 (단일)
     if (discoverFilter.day !== 'all') {
       others = others.filter(p => (p.days || []).some(d => d && d.includes(discoverFilter.day)));
@@ -1794,6 +1879,33 @@
     const reasonShort = (r) => reasonShortMap[r] || r.replace(/\s*사람$/, '').replace(/!$/, '');
     const reasonTags = reasonArr.slice(0, 3).map(r => `<span class="tag tag-reason">${escapeHtml(reasonShort(r))}</span>`).join('');
     const moreReason = reasonArr.length > 3 ? `<span class="tag tag-reason" style="opacity:0.6;">+${reasonArr.length - 3}</span>` : '';
+    
+    // 게스트(비회원)에게는 사진/소개/지역 숨김, 클릭 시 등록 페이지로
+    if (isGuest) {
+      const lockedAvatar = `<div class="profile-avatar"><div class="profile-card-photo-locked"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div></div>`;
+      return `
+        <div class="profile-card guest-card" onclick="track('guest_card_click'); goToPage('register')">
+          <div class="profile-card-header">
+            ${lockedAvatar}
+            <div class="profile-meta">
+              <div style="font-family: var(--serif-ko); font-size: 17px; font-weight: 500; margin-bottom: 6px;">${escapeHtml(p.nickname)}</div>
+              <div class="profile-tags">
+                <span class="tag tag-gender">${escapeHtml(p.gender || '-')}</span>
+                <span class="tag tag-age">${escapeHtml(p.age || '-')}</span>
+                ${p.mbti && p.mbti !== '비밀' ? `<span class="tag tag-lifestyle">${escapeHtml(p.mbti)}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="profile-tags">${dayTags}</div>
+          ${reasonTags ? `<div class="profile-tags">${reasonTags}${moreReason}</div>` : ''}
+          <div class="profile-card-intro" style="color: var(--ink-mute); font-style: italic; font-size: 13px;">프로필을 등록하면 자기소개와 사진을 볼 수 있어요.</div>
+          <div class="profile-card-footer">
+            <span style="color: var(--moss); font-family: var(--sans); font-size: 12px; letter-spacing: 0;">→ 클릭해서 프로필 등록</span>
+          </div>
+        </div>
+      `;
+    }
+    
     const avatar = p.photo
       ? `<div class="profile-avatar"><img src="${p.photo}" alt=""></div>`
       : `<div class="profile-avatar">${escapeHtml((p.nickname || '·')[0])}</div>`;
@@ -1918,6 +2030,7 @@
       closeProfileModal();
       renderTabCounts();
       showToast('동행 요청을 보냈어요!');
+      track('companion_request_sent', { has_message: message.length > 0 });
     } catch (err) {
       hideLoading();
       console.error(err);
@@ -1936,6 +2049,7 @@
       const activeTab = document.querySelector('.feed-tab.active').dataset.tab;
       renderTab(activeTab);
       showToast(status === 'accepted' ? '동행이 성사되었어요!' : '다음 기회에 만나요.');
+      track('companion_request_response', { status: status });
     } catch (err) {
       hideLoading();
       console.error(err);
@@ -2083,6 +2197,7 @@
       const [idHash, pwHash] = await Promise.all([sha256Hex(id), sha256Hex(pw)]);
       if (idHash === ADMIN_ID_HASH && pwHash === ADMIN_PW_HASH) {
         sessionStorage.setItem(SESSION_ADMIN_KEY, 'ok');
+        track('admin_login_success');
         showAdminDash();
       } else {
         document.getElementById('adminLoginError').classList.add('show');
