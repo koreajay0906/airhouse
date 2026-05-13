@@ -25,6 +25,7 @@
   body::before { content: ''; position: fixed; inset: 0; background-image: radial-gradient(circle at 20% 80%, rgba(139,111,71,0.04) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(90,107,74,0.04) 0%, transparent 50%); pointer-events: none; z-index: 0; }
   .topbar { position: relative; z-index: 10; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); background: var(--bg); gap: 12px; }
   .brand { font-family: var(--serif-en); font-size: 17px; font-weight: 500; letter-spacing: 0.08em; color: var(--ink); cursor: pointer; flex-shrink: 0; }
+  .brand .brand-short { display: none; }
   .brand .dot { display: inline-block; width: 5px; height: 5px; background: var(--moss); border-radius: 50%; margin: 0 10px; vertical-align: middle; }
   .topbar-right { display: flex; align-items: center; gap: 16px; font-family: var(--serif-en); font-size: 13px; color: var(--ink-mute); letter-spacing: 0.05em; min-width: 0; }
   .user-chip { display: none; align-items: center; gap: 8px; padding: 6px 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 20px; cursor: pointer; transition: all 0.2s; min-width: 0; }
@@ -374,7 +375,7 @@
 <div class="topbar">
   <div class="brand" onclick="handleBrandClick()">
     <span class="brand-full">HANDYBUS <span class="dot"></span> THE AIR HOUSE</span>
-    <span class="brand-short" style="display:none;">HANDYBUS</span>
+    <span class="brand-short">HANDYBUS</span>
   </div>
   <div class="topbar-right">
     <span class="topbar-meta" id="topbarMeta">2026.05.23 — 05.25</span>
@@ -890,8 +891,10 @@
   const SUPABASE_ANON_KEY = 'sb_publishable_-XHgOfdvWvDryhfc90s8tA_HyO_yNoR';
   // ============================================================
   
-  const ADMIN_ID = 'handybus';
-  const ADMIN_PW = 'handybus123!';
+  // 어드민 인증: SHA-256 해시 비교 (평문 비밀번호 노출 방지)
+  // 원본 ID/PW는 코드에 저장되지 않으며, 입력값을 해시해서 비교합니다.
+  const ADMIN_ID_HASH = '143ca0eb48418d251582f4e29ab95b5d5de090f54e0ee6d6e8903fad33b20f3a';
+  const ADMIN_PW_HASH = 'cfe3038ded01b077b3ed386584190c9ac09c560cdd7a1a2d0d83366b5f485863';
   
   const TOTAL_STEPS = 13;
   const MAX_GENRES = 5;
@@ -1862,15 +1865,26 @@
     }
   }
   function closeAdmin() { document.getElementById('adminOverlay').classList.remove('active'); }
-  function doAdminLogin() {
+  async function sha256Hex(text) {
+    const buf = new TextEncoder().encode(text);
+    const hash = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  async function doAdminLogin() {
     const id = document.getElementById('adminLoginId').value.trim();
     const pw = document.getElementById('adminLoginPw').value;
-    if (id === ADMIN_ID && pw === ADMIN_PW) {
-      sessionStorage.setItem(SESSION_ADMIN_KEY, 'ok');
-      showAdminDash();
-    } else {
+    try {
+      const [idHash, pwHash] = await Promise.all([sha256Hex(id), sha256Hex(pw)]);
+      if (idHash === ADMIN_ID_HASH && pwHash === ADMIN_PW_HASH) {
+        sessionStorage.setItem(SESSION_ADMIN_KEY, 'ok');
+        showAdminDash();
+      } else {
+        document.getElementById('adminLoginError').classList.add('show');
+        document.getElementById('adminLoginPw').value = '';
+      }
+    } catch (err) {
+      console.error(err);
       document.getElementById('adminLoginError').classList.add('show');
-      document.getElementById('adminLoginPw').value = '';
     }
   }
   function adminLogout() { sessionStorage.removeItem(SESSION_ADMIN_KEY); closeAdmin(); }
