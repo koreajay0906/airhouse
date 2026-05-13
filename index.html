@@ -503,9 +503,9 @@
       <h2 class="step-title">어느 날 가실 예정인가요?</h2>
       <p class="step-desc">중복 선택할 수 있어요.</p>
       <div class="options cols-3">
-        <button class="option" data-value="23일 (토)" onclick="selectOption(this, 'days', true)">23일 토<span class="option-sub">May 23 Sat</span></button>
-        <button class="option" data-value="24일 (일)" onclick="selectOption(this, 'days', true)">24일 일<span class="option-sub">May 24 Sun</span></button>
-        <button class="option" data-value="25일 (월)" onclick="selectOption(this, 'days', true)">25일 월<span class="option-sub">May 25 Mon</span></button>
+        <button class="option" data-value="23일 토" onclick="selectOption(this, 'days', true)">23일 토<span class="option-sub">May 23 Sat</span></button>
+        <button class="option" data-value="24일 일" onclick="selectOption(this, 'days', true)">24일 일<span class="option-sub">May 24 Sun</span></button>
+        <button class="option" data-value="25일 월" onclick="selectOption(this, 'days', true)">25일 월<span class="option-sub">May 25 Mon</span></button>
       </div>
       <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
     </div>
@@ -514,7 +514,7 @@
       <div class="step-num">Question 06</div>
       <h2 class="step-title">어디서 출발하세요?</h2>
       <p class="step-desc">같은 지역에서 출발하는 분들끼리 만날 수 있어요.</p>
-      <div class="input-wrap"><input type="text" class="input" id="region" placeholder="예: 서울 강남, 부산 해운대, 대구" oninput="checkInput('region')" oncompositionend="checkInput('region')"></div>
+      <div class="input-wrap"><input type="text" class="input" id="region" placeholder="예: 서울 강남, 부산 해운대, 대구" oninput="enforceMaxLength(this, 30); checkInput('region')" oncompositionend="enforceMaxLength(this, 30); checkInput('region')"></div>
       <div class="btn-row"><button class="btn btn-ghost" onclick="prev()">← 이전</button><button class="btn btn-primary" disabled onclick="next()">다음 →</button></div>
     </div>
 
@@ -605,7 +605,7 @@
         <button class="option small" data-value="재즈" onclick="selectMusicGenre(this)">재즈</button>
         <button class="option small" data-value="록 / 메탈" onclick="selectMusicGenre(this)">록 / 메탈</button>
         <button class="option small" data-value="팝" onclick="selectMusicGenre(this)">팝</button>
-        <button class="option small" data-value="장르 가리지 않음" onclick="selectMusicGenre(this)">장르 안 가림</button>
+        <button class="option small" data-value="장르 안 가림" onclick="selectMusicGenre(this)">장르 안 가림</button>
       </div>
       <div style="margin-top: 8px;">
         <button class="option small" data-value="비밀" onclick="selectMusicGenre(this)" style="width: 100%;" id="genrePrivateBtn">비밀</button>
@@ -706,13 +706,13 @@
     <div style="margin-bottom: 32px;">
       <div class="step-num">Days Attending</div>
       <div class="options cols-3" id="editDaysOpts" style="margin-top: 12px;">
-        <button class="option" data-value="23일 (토)" onclick="editToggleDay(this)">23일 토</button>
-        <button class="option" data-value="24일 (일)" onclick="editToggleDay(this)">24일 일</button>
-        <button class="option" data-value="25일 (월)" onclick="editToggleDay(this)">25일 월</button>
+        <button class="option" data-value="23일 토" onclick="editToggleDay(this)">23일 토</button>
+        <button class="option" data-value="24일 일" onclick="editToggleDay(this)">24일 일</button>
+        <button class="option" data-value="25일 월" onclick="editToggleDay(this)">25일 월</button>
       </div>
     </div>
 
-    <div style="margin-bottom: 32px;"><div class="step-num">From</div><input type="text" class="input" id="editRegion" style="margin-top: 12px;"></div>
+    <div style="margin-bottom: 32px;"><div class="step-num">From</div><input type="text" class="input" id="editRegion" style="margin-top: 12px;" oninput="enforceMaxLength(this, 30)" oncompositionend="enforceMaxLength(this, 30)"></div>
 
     <div style="margin-bottom: 32px;">
       <div class="step-num">Reason</div>
@@ -788,7 +788,7 @@
         <button class="option small" data-value="재즈" onclick="editToggleGenre(this)">재즈</button>
         <button class="option small" data-value="록 / 메탈" onclick="editToggleGenre(this)">록 / 메탈</button>
         <button class="option small" data-value="팝" onclick="editToggleGenre(this)">팝</button>
-        <button class="option small" data-value="장르 가리지 않음" onclick="editToggleGenre(this)">장르 안 가림</button>
+        <button class="option small" data-value="장르 안 가림" onclick="editToggleGenre(this)">장르 안 가림</button>
       </div>
       <div style="margin-top: 8px;">
         <button class="option small" data-value="비밀" onclick="editToggleGenre(this)" style="width: 100%;" id="editGenrePrivateBtn">비밀</button>
@@ -1206,8 +1206,8 @@
   function selectMusicGenre(el) {
     const val = el.dataset.value;
     if (!Array.isArray(formData.genres)) formData.genres = [];
-    const isExclusive = (val === '비밀' || val === '장르 가리지 않음');
-    const currentExclusive = formData.genres.find(g => g === '비밀' || g === '장르 가리지 않음');
+    const isExclusive = (val === '비밀' || val === '장르 안 가림');
+    const currentExclusive = formData.genres.find(g => g === '비밀' || g === '장르 안 가림');
     const step = el.closest('.step');
     
     if (isExclusive) {
@@ -1215,9 +1215,9 @@
       step.querySelectorAll('.option').forEach(o => o.classList.toggle('selected', o.dataset.value === val));
     } else {
       if (currentExclusive) {
-        formData.genres = formData.genres.filter(g => g !== '비밀' && g !== '장르 가리지 않음');
+        formData.genres = formData.genres.filter(g => g !== '비밀' && g !== '장르 안 가림');
         step.querySelectorAll('.option').forEach(o => {
-          if (o.dataset.value === '비밀' || o.dataset.value === '장르 가리지 않음') o.classList.remove('selected');
+          if (o.dataset.value === '비밀' || o.dataset.value === '장르 안 가림') o.classList.remove('selected');
         });
       }
       const idx = formData.genres.indexOf(val);
@@ -1495,8 +1495,8 @@
   function editToggleGenre(el) {
     const val = el.dataset.value;
     if (!Array.isArray(editData.genres)) editData.genres = [];
-    const isExclusive = (val === '비밀' || val === '장르 가리지 않음');
-    const currentExclusive = editData.genres.find(g => g === '비밀' || g === '장르 가리지 않음');
+    const isExclusive = (val === '비밀' || val === '장르 안 가림');
+    const currentExclusive = editData.genres.find(g => g === '비밀' || g === '장르 안 가림');
     
     if (isExclusive) {
       editData.genres = [val];
@@ -1504,8 +1504,8 @@
       document.getElementById('editGenrePrivateBtn').classList.toggle('selected', val === '비밀');
     } else {
       if (currentExclusive) {
-        editData.genres = editData.genres.filter(g => g !== '비밀' && g !== '장르 가리지 않음');
-        document.querySelectorAll('#editGenresOpts .option').forEach(o => { if (o.dataset.value === '장르 가리지 않음') o.classList.remove('selected'); });
+        editData.genres = editData.genres.filter(g => g !== '비밀' && g !== '장르 안 가림');
+        document.querySelectorAll('#editGenresOpts .option').forEach(o => { if (o.dataset.value === '장르 안 가림') o.classList.remove('selected'); });
         document.getElementById('editGenrePrivateBtn').classList.remove('selected');
       }
       const idx = editData.genres.indexOf(val);
@@ -1928,7 +1928,10 @@
     const hash = await crypto.subtle.digest('SHA-256', buf);
     return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
   }
+  let adminLoginInProgress = false;
   async function doAdminLogin() {
+    if (adminLoginInProgress) return;
+    adminLoginInProgress = true;
     const id = document.getElementById('adminLoginId').value.trim();
     const pw = document.getElementById('adminLoginPw').value;
     try {
@@ -1943,6 +1946,8 @@
     } catch (err) {
       console.error(err);
       document.getElementById('adminLoginError').classList.add('show');
+    } finally {
+      adminLoginInProgress = false;
     }
   }
   function adminLogout() { sessionStorage.removeItem(SESSION_ADMIN_KEY); closeAdmin(); }
@@ -2022,7 +2027,7 @@
   }
   
   function exportCSV() {
-    if (profilesCache.length === 0) { alert('내보낼 데이터가 없습니다.'); return; }
+    if (profilesCache.length === 0) { showToast('내보낼 데이터가 없습니다.'); return; }
     const headers = ['등록시각', '닉네임', '성별', '나이대', '참가일', '출발지역', '동행이유', '흡연', '음주', 'MBTI', '음악장르', '자기소개', '전화번호', '연락처'];
     const rows = profilesCache.map(p => [
       new Date(p.createdAt).toLocaleString('ko-KR'),
