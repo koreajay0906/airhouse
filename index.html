@@ -23,16 +23,16 @@
   }
   html, body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.6; min-height: 100vh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   body::before { content: ''; position: fixed; inset: 0; background-image: radial-gradient(circle at 20% 80%, rgba(139,111,71,0.04) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(90,107,74,0.04) 0%, transparent 50%); pointer-events: none; z-index: 0; }
-  .topbar { position: relative; z-index: 10; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); background: var(--bg); }
-  .brand { font-family: var(--serif-en); font-size: 17px; font-weight: 500; letter-spacing: 0.08em; color: var(--ink); cursor: pointer; }
+  .topbar { position: relative; z-index: 10; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); background: var(--bg); gap: 12px; }
+  .brand { font-family: var(--serif-en); font-size: 17px; font-weight: 500; letter-spacing: 0.08em; color: var(--ink); cursor: pointer; flex-shrink: 0; }
   .brand .dot { display: inline-block; width: 5px; height: 5px; background: var(--moss); border-radius: 50%; margin: 0 10px; vertical-align: middle; }
-  .topbar-right { display: flex; align-items: center; gap: 16px; font-family: var(--serif-en); font-size: 13px; color: var(--ink-mute); letter-spacing: 0.05em; }
-  .user-chip { display: none; align-items: center; gap: 8px; padding: 6px 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 20px; cursor: pointer; transition: all 0.2s; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; font-family: var(--serif-en); font-size: 13px; color: var(--ink-mute); letter-spacing: 0.05em; min-width: 0; }
+  .user-chip { display: none; align-items: center; gap: 8px; padding: 6px 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 20px; cursor: pointer; transition: all 0.2s; min-width: 0; }
   .user-chip.active { display: flex; }
   .user-chip:hover { border-color: var(--accent-soft); }
-  .user-chip-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; overflow: hidden; }
+  .user-chip-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; overflow: hidden; flex-shrink: 0; }
   .user-chip-avatar img { width: 100%; height: 100%; object-fit: cover; }
-  .user-chip-name { font-family: var(--sans); font-size: 13px; color: var(--ink); letter-spacing: 0; }
+  .user-chip-name { font-family: var(--sans); font-size: 13px; color: var(--ink); letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .page { display: none; position: relative; z-index: 1; }
   .page.active { display: block; }
   .home-hero { padding: 100px 32px 60px; text-align: center; max-width: 800px; margin: 0 auto; }
@@ -132,6 +132,7 @@
   .tab-content { display: none; }
   .tab-content.active { display: block; animation: fadeIn 0.4s; }
   .filter-bar-feed { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+  .filter-chip-group { display: flex; gap: 8px; flex-wrap: wrap; }
   .filter-label { font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; margin-right: 8px; }
   .filter-chip { background: var(--paper); border: 1px solid var(--line); padding: 6px 14px; font-size: 13px; cursor: pointer; border-radius: 2px; transition: all 0.2s; font-family: inherit; color: var(--ink); }
   .filter-chip:hover { border-color: var(--accent-soft); }
@@ -144,15 +145,15 @@
   .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .profile-avatar-lg { width: 96px; height: 96px; font-size: 32px; }
   .profile-meta { flex: 1; min-width: 0; }
-  .profile-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-  .tag { font-family: var(--serif-en); font-size: 10px; padding: 3px 8px; border-radius: 2px; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid; }
+  .profile-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .tag { font-family: var(--serif-en); font-size: 10px; padding: 3px 8px; border-radius: 2px; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid; display: inline-flex; align-items: center; line-height: 1.4; }
   .tag-gender { border-color: var(--moss); color: var(--moss); }
   .tag-age { border-color: var(--earth); color: var(--earth); }
   .tag-day { border-color: var(--accent-soft); color: var(--accent-soft); }
   .tag-lifestyle { border-color: var(--ink-mute); color: var(--ink-soft); font-family: inherit; font-size: 11px; letter-spacing: 0; text-transform: none; }
   .profile-card-intro { font-family: var(--serif-ko); font-size: 15px; line-height: 1.6; color: var(--ink); flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
-  .profile-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--line-soft); font-size: 12px; color: var(--ink-mute); font-family: var(--serif-en); letter-spacing: 0.05em; }
-  .profile-card-region { color: var(--ink-soft); }
+  .profile-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--line-soft); font-size: 12px; color: var(--ink-mute); font-family: var(--serif-en); letter-spacing: 0.05em; gap: 8px; }
+  .profile-card-region { color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .req-status { display: inline-block; padding: 4px 10px; border-radius: 2px; font-size: 11px; font-family: var(--serif-en); letter-spacing: 0.15em; text-transform: uppercase; border: 1px solid; }
   .req-status-pending { border-color: var(--warning); color: var(--warning); }
   .req-status-accepted { border-color: var(--success-c); color: var(--success-c); background: rgba(90,122,74,0.06); }
@@ -170,10 +171,10 @@
   .pd-field-value { font-size: 14px; color: var(--ink); }
   .contact-reveal-box { margin-top: 16px; padding: 20px; background: rgba(90,122,74,0.06); border: 1px solid var(--success-c); border-radius: 2px; }
   .contact-reveal-title { font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--success-c); text-transform: uppercase; margin-bottom: 12px; }
-  .contact-item { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px dashed var(--line-soft); }
+  .contact-item { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px dashed var(--line-soft); gap: 8px; flex-wrap: wrap; }
   .contact-item:last-child { border-bottom: none; }
-  .contact-item-type { font-family: var(--serif-en); color: var(--ink-mute); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
-  .contact-item-value { color: var(--ink); font-weight: 500; }
+  .contact-item-type { font-family: var(--serif-en); color: var(--ink-mute); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; flex-shrink: 0; }
+  .contact-item-value { color: var(--ink); font-weight: 500; word-break: break-all; }
   .copy-btn { background: transparent; border: 1px solid var(--line); color: var(--ink-mute); padding: 2px 8px; font-size: 10px; margin-left: 8px; cursor: pointer; border-radius: 2px; font-family: var(--serif-en); letter-spacing: 0.1em; text-transform: uppercase; }
   .copy-btn:hover { border-color: var(--ink); color: var(--ink); }
   .modal-actions { display: flex; gap: 8px; margin-top: 24px; }
@@ -228,51 +229,161 @@
   .spinner { width: 32px; height: 32px; border: 2px solid var(--line); border-top-color: var(--moss); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-text { font-family: var(--serif-en); font-size: 12px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; }
+
+  /* ===== 태블릿 (768px 이하) ===== */
+  @media (max-width: 768px) {
+    .feed-wrap { padding: 24px 16px; }
+    .profile-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  }
+
+  /* ===== 모바일 (640px 이하) ===== */
   @media (max-width: 640px) {
-    .topbar { padding: 14px 16px; }
+    .topbar { padding: 12px 16px; }
+    .brand { font-size: 14px; letter-spacing: 0.05em; }
+    .brand .brand-full { display: none; }
+    .brand .brand-short { display: inline; }
     .topbar-right { gap: 8px; font-size: 11px; }
-    .home-hero { padding: 60px 20px 40px; }
-    .home-cta { flex-direction: column; }
-    .form-section { padding: 32px 20px 80px; }
+    .topbar-meta { display: none; }
+    .user-chip { padding: 5px 10px 5px 5px; max-width: 140px; }
+    .user-chip-name { max-width: 80px; font-size: 12px; }
+
+    .home-hero { padding: 50px 20px 32px; }
+    .home-title { font-size: clamp(32px, 8vw, 44px); margin-bottom: 24px; }
+    .home-desc { font-size: 14px; margin-bottom: 36px; }
+    .home-cta { flex-direction: column; gap: 10px; }
+    .festival-info { padding: 0 20px; grid-template-columns: 1fr; margin-top: 60px; }
+
+    .form-section { padding: 28px 18px 80px; }
+    .step-title { font-size: 22px; }
+    .step-desc { font-size: 14px; margin-bottom: 24px; }
     .options.cols-3, .options.cols-4 { grid-template-columns: 1fr 1fr; }
-    .festival-info { padding: 0 20px; grid-template-columns: 1fr; }
-    .feed-wrap { padding: 20px 16px; }
-    .profile-grid { grid-template-columns: 1fr; }
-    .pd-grid { grid-template-columns: 1fr; }
-    .request-item { grid-template-columns: auto 1fr; }
-    .request-actions { grid-column: 1 / -1; flex-direction: row; justify-content: flex-end; }
+    .option { padding: 14px 12px; font-size: 14px; }
+    .option.small { padding: 12px 8px; font-size: 13px; }
+
+    .feed-wrap { padding: 16px 12px 80px; }
+
+    .feed-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 20px;
+      overflow: visible;
+    }
+    .feed-tab {
+      padding: 10px 4px;
+      font-size: 12px;
+      border-bottom: 2px solid transparent;
+      border-right: 1px solid var(--line-soft);
+      margin-bottom: -1px;
+      justify-content: center;
+      gap: 4px;
+      min-width: 0;
+    }
+    .feed-tab:nth-child(3n) { border-right: none; }
+    .feed-tab:nth-child(n+4) { border-top: 1px solid var(--line-soft); }
+    .tab-count { font-size: 10px; padding: 1px 6px; }
+
+    .filter-bar-feed {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .filter-label { margin-right: 0; margin-bottom: 2px; }
+    .filter-chip-group {
+      width: 100%;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .filter-chip-group::-webkit-scrollbar { display: none; }
+    .filter-chip { padding: 6px 12px; font-size: 12px; flex-shrink: 0; white-space: nowrap; }
+
+    .profile-grid { grid-template-columns: 1fr; gap: 10px; }
+    .profile-card { padding: 18px; gap: 12px; }
+    .profile-card-header { gap: 10px; }
+    .profile-avatar { width: 48px; height: 48px; font-size: 17px; }
+    .profile-tags { gap: 4px; }
+    .tag { padding: 3px 7px; font-size: 10px; }
+    .tag-lifestyle { font-size: 10px; padding: 3px 7px; }
+    .profile-card-intro { font-size: 14px; -webkit-line-clamp: 2; }
+    .profile-card-footer { font-size: 11px; }
+
+    .modal { padding: 16px; }
+    .modal-content { padding: 24px 20px; max-height: 88vh; }
+    .modal-title { font-size: 19px; margin-bottom: 18px; padding-bottom: 12px; }
+    .pd-header { gap: 10px; margin-bottom: 20px; padding-bottom: 18px; }
+    .profile-avatar-lg { width: 80px; height: 80px; font-size: 26px; }
+    .pd-intro { font-size: 15px; padding: 16px; margin-bottom: 18px; }
+    .pd-grid { grid-template-columns: 1fr; gap: 10px; }
+    .pd-field { padding: 10px 12px; }
+    .modal-actions { flex-direction: column-reverse; gap: 8px; }
+    .modal-actions .btn { width: 100%; }
+
+    .request-item { grid-template-columns: auto 1fr; gap: 12px; padding: 16px; }
+    .request-actions {
+      grid-column: 1 / -1;
+      flex-direction: row;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .mini-btn { padding: 7px 12px; font-size: 11px; }
+
     .admin-header { flex-direction: column; align-items: flex-start; gap: 16px; }
-    .admin-dash { padding: 24px 20px 60px; }
-    .contact-row { grid-template-columns: 1fr; }
-    .contact-row > .contact-remove { justify-self: end; }
+    .admin-dash { padding: 24px 16px 60px; }
+    .admin-title-group h2 { font-size: 26px; }
+    .admin-actions { flex-wrap: wrap; }
+    .admin-table-row { grid-template-columns: auto 1fr; gap: 10px; padding: 14px 16px; }
+    .admin-table-row > *:nth-child(3),
+    .admin-table-row > *:nth-child(4) { grid-column: 1 / -1; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .stat { padding: 18px 14px; }
+    .stat-value { font-size: 24px; }
+
+    .auth-card { padding: 32px 24px; }
+    .auth-title { font-size: 24px; }
+
+    .contact-row { grid-template-columns: 1fr auto; gap: 8px; }
+    .contact-row .contact-select { grid-column: 1 / -1; }
+    .photo-preview { width: 130px; height: 130px; }
+  }
+
+  /* ===== 초소형 (380px 이하) ===== */
+  @media (max-width: 380px) {
+    .feed-tab { font-size: 11px; padding: 9px 2px; }
+    .tab-count { display: none; }
+    .home-title { font-size: 28px; }
+    .step-title { font-size: 20px; }
+    .options.cols-4 { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
 <body>
-<!-- Config 경고 (Supabase 미설정 시) -->
 <div class="config-warning" id="configWarning" style="display:none;">
   ⚠️ Supabase가 설정되지 않았습니다. HTML 상단의 SUPABASE_URL과 SUPABASE_ANON_KEY를 입력하세요.
 </div>
 
-<!-- Loading overlay -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
   <div class="loading-text" id="loadingText">Loading</div>
 </div>
 
-<!-- Top bar -->
 <div class="topbar">
-  <div class="brand" onclick="handleBrandClick()">HANDYBUS <span class="dot"></span> THE AIR HOUSE</div>
+  <div class="brand" onclick="handleBrandClick()">
+    <span class="brand-full">HANDYBUS <span class="dot"></span> THE AIR HOUSE</span>
+    <span class="brand-short" style="display:none;">THE AIR HOUSE</span>
+  </div>
   <div class="topbar-right">
-    <span id="topbarMeta">2026.05.23 — 05.25</span>
+    <span class="topbar-meta" id="topbarMeta">2026.05.23 — 05.25</span>
     <div class="user-chip" id="userChip" onclick="goToFeed()">
       <div class="user-chip-avatar" id="userChipAvatar"></div>
       <span class="user-chip-name" id="userChipName"></span>
     </div>
   </div>
 </div>
-
-<!-- ============== HOME ============== -->
 <div class="page active" id="page-home">
   <section class="home-hero">
     <div class="home-eyebrow">Companion Matching</div>
@@ -294,7 +405,6 @@
   </footer>
 </div>
 
-<!-- ============== LOGIN ============== -->
 <div class="page" id="page-login">
   <div class="auth-wrap">
     <div class="auth-card">
@@ -318,7 +428,6 @@
   </div>
 </div>
 
-<!-- ============== REGISTER ============== -->
 <div class="page" id="page-register">
   <section class="form-section">
     <button class="back-link" onclick="goHome()">← 홈으로</button>
@@ -529,7 +638,6 @@
   </section>
 </div>
 
-<!-- ============== SUCCESS (별도 페이지) ============== -->
 <div class="page" id="page-success">
   <div class="success-page">
     <div class="success-inner">
@@ -541,7 +649,6 @@
   </div>
 </div>
 
-<!-- ============== EDIT PROFILE ============== -->
 <div class="page" id="page-edit">
   <section class="form-section">
     <button class="back-link" onclick="goToFeed()">← 피드로</button>
@@ -697,7 +804,6 @@
   </section>
 </div>
 
-<!-- ============== FEED ============== -->
 <div class="page" id="page-feed">
   <div class="feed-wrap">
     <div class="feed-tabs">
@@ -710,10 +816,12 @@
     <div class="tab-content active" id="tab-discover">
       <div class="filter-bar-feed">
         <span class="filter-label">By day</span>
-        <button class="filter-chip active" data-filter="all" onclick="setDiscoverFilter('all')">전체</button>
-        <button class="filter-chip" data-filter="23일" onclick="setDiscoverFilter('23일')">23일 토</button>
-        <button class="filter-chip" data-filter="24일" onclick="setDiscoverFilter('24일')">24일 일</button>
-        <button class="filter-chip" data-filter="25일" onclick="setDiscoverFilter('25일')">25일 월</button>
+        <div class="filter-chip-group">
+          <button class="filter-chip active" data-filter="all" onclick="setDiscoverFilter('all')">전체</button>
+          <button class="filter-chip" data-filter="23일" onclick="setDiscoverFilter('23일')">23일 토</button>
+          <button class="filter-chip" data-filter="24일" onclick="setDiscoverFilter('24일')">24일 일</button>
+          <button class="filter-chip" data-filter="25일" onclick="setDiscoverFilter('25일')">25일 월</button>
+        </div>
       </div>
       <div id="discoverGrid"></div>
     </div>
@@ -725,7 +833,6 @@
   <footer class="footer"><div>HANDYBUS × THE AIR HOUSE · COMPANION MATCHING 2026</div></footer>
 </div>
 
-<!-- Modals -->
 <div class="modal" id="profileModal" onclick="if(event.target===this) closeProfileModal()"><div class="modal-content" id="profileModalContent"></div></div>
 
 <div class="modal" id="requestModal" onclick="if(event.target===this) closeRequestModal()">
@@ -741,7 +848,6 @@
   </div>
 </div>
 
-<!-- Admin -->
 <div class="admin-overlay" id="adminOverlay">
   <div class="login-modal" id="adminLoginModal">
     <div class="auth-card">
@@ -778,18 +884,15 @@
 <div class="toast" id="toast"></div>
 <script>
   // ============================================================
-  // 🔧 SUPABASE 설정 (이 두 값을 본인 프로젝트 값으로 교체하세요)
+  // 🔧 SUPABASE 설정
   // ============================================================
-  // Supabase 대시보드 → Settings → API 에서 복사
   const SUPABASE_URL = 'https://zuwuifjegbpljofbdalp.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_-XHgOfdvWvDryhfc90s8tA_HyO_yNoR';
   // ============================================================
   
-  // 어드민 계정
   const ADMIN_ID = 'handybus';
   const ADMIN_PW = 'handybus123!';
   
-  // 상수
   const TOTAL_STEPS = 13;
   const MAX_GENRES = 5;
   const SESSION_USER_KEY = 'airhouse_user_id';
@@ -803,7 +906,6 @@
     { value: 'other', label: '기타' }
   ];
   
-  // Supabase 클라이언트 초기화
   let sb = null;
   const isConfigured = SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY_HERE' && SUPABASE_URL && SUPABASE_ANON_KEY;
   
@@ -813,7 +915,6 @@
     document.getElementById('configWarning').style.display = 'block';
   }
   
-  // 상태
   let currentStep = 1;
   let formData = { days: [], photo: null, contacts: [], genres: [] };
   let editData = {};
@@ -822,61 +923,34 @@
   let pendingRequestTargetId = null;
   let profilesCache = [];
   let requestsCache = [];
-  let composing = false;  // 한글 IME 조합 중 여부
+  let composing = false;
   
-  // ============ DB API (Supabase) ============
   function dbToProfile(row) {
-    // DB snake_case → JS camelCase
     return {
-      id: row.id,
-      nickname: row.nickname,
-      photo: row.photo,
-      gender: row.gender,
-      age: row.age,
-      days: row.days || [],
-      region: row.region,
-      reason: row.reason,
-      smoking: row.smoking,
-      drinking: row.drinking,
-      mbti: row.mbti,
-      genres: row.genres || [],
-      intro: row.intro,
-      phone: row.phone,
-      contacts: row.contacts || [],
-      createdAt: row.created_at,
-      updatedAt: row.updated_at
+      id: row.id, nickname: row.nickname, photo: row.photo,
+      gender: row.gender, age: row.age, days: row.days || [],
+      region: row.region, reason: row.reason, smoking: row.smoking,
+      drinking: row.drinking, mbti: row.mbti, genres: row.genres || [],
+      intro: row.intro, phone: row.phone, contacts: row.contacts || [],
+      createdAt: row.created_at, updatedAt: row.updated_at
     };
   }
   
   function profileToDb(p) {
     return {
-      id: p.id,
-      nickname: p.nickname,
-      photo: p.photo,
-      gender: p.gender,
-      age: p.age,
-      days: p.days || [],
-      region: p.region,
-      reason: p.reason,
-      smoking: p.smoking,
-      drinking: p.drinking,
-      mbti: p.mbti,
-      genres: p.genres || [],
-      intro: p.intro,
-      phone: p.phone,
-      contacts: p.contacts || []
+      id: p.id, nickname: p.nickname, photo: p.photo,
+      gender: p.gender, age: p.age, days: p.days || [],
+      region: p.region, reason: p.reason, smoking: p.smoking,
+      drinking: p.drinking, mbti: p.mbti, genres: p.genres || [],
+      intro: p.intro, phone: p.phone, contacts: p.contacts || []
     };
   }
   
   function dbToRequest(row) {
     return {
-      id: row.id,
-      fromId: row.from_id,
-      toId: row.to_id,
-      message: row.message,
-      status: row.status,
-      createdAt: row.created_at,
-      respondedAt: row.responded_at
+      id: row.id, fromId: row.from_id, toId: row.to_id,
+      message: row.message, status: row.status,
+      createdAt: row.created_at, respondedAt: row.responded_at
     };
   }
   
@@ -899,7 +973,6 @@
   async function findProfileByPhone(phone) {
     if (!sb) return null;
     const cleaned = normalizePhone(phone);
-    // SQL 측에서 정규화가 안되므로 클라이언트에서 fetch 후 비교
     const profiles = await fetchProfiles();
     return profiles.find(p => normalizePhone(p.phone) === cleaned) || null;
   }
@@ -929,11 +1002,8 @@
   async function insertRequest(req) {
     if (!sb) throw new Error('Supabase 미설정');
     const { data, error } = await sb.from('requests').insert({
-      id: req.id,
-      from_id: req.fromId,
-      to_id: req.toId,
-      message: req.message,
-      status: req.status
+      id: req.id, from_id: req.fromId, to_id: req.toId,
+      message: req.message, status: req.status
     }).select().single();
     if (error) throw error;
     return dbToRequest(data);
@@ -942,8 +1012,7 @@
   async function updateRequestStatus(id, status) {
     if (!sb) throw new Error('Supabase 미설정');
     const { error } = await sb.from('requests').update({
-      status,
-      responded_at: new Date().toISOString()
+      status, responded_at: new Date().toISOString()
     }).eq('id', id);
     if (error) throw error;
   }
@@ -954,7 +1023,6 @@
     if (error) throw error;
   }
   
-  // ============ UI 도우미 ============
   function showLoading(text) {
     document.getElementById('loadingText').textContent = text || 'Loading';
     document.getElementById('loadingOverlay').classList.add('active');
@@ -981,7 +1049,6 @@
     return (p || '').replace(/[^0-9]/g, '');
   }
   
-  // ============ NAVIGATION ============
   function goToPage(page) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
@@ -1026,7 +1093,6 @@
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
   
-  // ============ AUTH ============
   async function doUserLogin() {
     if (!sb) { showToast('Supabase 설정이 필요합니다.'); return; }
     const raw = document.getElementById('loginPhone').value.trim();
@@ -1077,8 +1143,7 @@
       chip.classList.remove('active');
     }
   }
-  
-  // ============ REGISTER FORM ============
+
   function selectOption(el, key, multi) {
     if (multi) {
       el.classList.toggle('selected');
@@ -1131,7 +1196,6 @@
     else { delete formData[key]; disableNext(); }
   }
   
-  // 모바일 한글 입력 호환을 위해 maxlength 대신 JS로 처리
   function enforceMaxLength(el, maxLen) {
     if (el.value.length > maxLen) {
       el.value = el.value.slice(0, maxLen);
@@ -1146,7 +1210,6 @@
     dupEl.classList.remove('show');
     
     if (cleaned.length >= 9 && cleaned.length <= 15) {
-      // 중복 체크
       const dup = await findProfileByPhone(cleaned);
       if (dup) {
         delete formData.phone;
@@ -1202,7 +1265,6 @@
     updateProgress();
   }
   
-  // ============ PHOTO ============
   function compressImage(file, callback) {
     if (file.size > 5 * 1024 * 1024) { showToast('이미지는 5MB 이하만 가능해요.'); return; }
     const reader = new FileReader();
@@ -1240,7 +1302,6 @@
     document.getElementById('skipNote').style.display = 'inline';
   }
   
-  // ============ CONTACTS ============
   function addContactRow() {
     if (!formData.contacts) formData.contacts = [];
     formData.contacts.push({ type: 'kakao', value: '' });
@@ -1265,25 +1326,17 @@
   function updateContactValue(idx, value) { formData.contacts[idx].value = value; validateFinalStep(); }
   function removeContactRow(idx) { formData.contacts.splice(idx, 1); if (formData.contacts.length === 0) addContactRow(); else renderContacts(); }
   
-  // ============ SUBMIT REGISTER ============
   async function submitForm() {
     if (!sb) { showToast('Supabase 설정이 필요합니다.'); return; }
     
     const profile = {
       id: 'prof_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
-      nickname: formData.nickname,
-      photo: formData.photo,
-      gender: formData.gender,
-      age: formData.age,
-      days: formData.days,
-      region: formData.region,
-      reason: formData.reason,
-      smoking: formData.smoking,
-      drinking: formData.drinking,
-      mbti: formData.mbti,
-      genres: formData.genres,
-      intro: formData.intro,
-      phone: formData.phone,
+      nickname: formData.nickname, photo: formData.photo,
+      gender: formData.gender, age: formData.age, days: formData.days,
+      region: formData.region, reason: formData.reason,
+      smoking: formData.smoking, drinking: formData.drinking,
+      mbti: formData.mbti, genres: formData.genres,
+      intro: formData.intro, phone: formData.phone,
       contacts: formData.contacts.filter(c => c.type && c.value && c.value.trim())
     };
     
@@ -1318,8 +1371,7 @@
     updateCharCount();
     document.getElementById('contactsList').innerHTML = '';
   }
-  
-  // ============ EDIT PROFILE ============
+
   function goToEditProfile() {
     if (!currentUser) return;
     editData = JSON.parse(JSON.stringify(currentUser));
@@ -1344,12 +1396,9 @@
       document.getElementById('editPhotoActions').style.display = 'none';
     }
     
-    // Single selects
     const singleKeys = [
-      ['gender', 'editGenderOpts'],
-      ['age', 'editAgeOpts'],
-      ['reason', 'editReasonOpts'],
-      ['smoking', 'editSmokingOpts'],
+      ['gender', 'editGenderOpts'], ['age', 'editAgeOpts'],
+      ['reason', 'editReasonOpts'], ['smoking', 'editSmokingOpts'],
       ['drinking', 'editDrinkingOpts']
     ];
     singleKeys.forEach(([key, containerId]) => {
@@ -1357,14 +1406,11 @@
       if (!container) return;
       container.querySelectorAll('.option').forEach(o => o.classList.toggle('selected', o.dataset.value === editData[key]));
     });
-    // MBTI - 그리드 + 별도 비밀 버튼
     document.querySelectorAll('#editMbtiOpts .option').forEach(o => o.classList.toggle('selected', o.dataset.value === editData.mbti));
     document.getElementById('editMbtiPrivate').classList.toggle('selected', editData.mbti === '비밀');
     
-    // Days (multi)
     document.querySelectorAll('#editDaysOpts .option').forEach(o => o.classList.toggle('selected', editData.days.includes(o.dataset.value)));
     
-    // Genres (multi)
     document.querySelectorAll('#editGenresOpts .option').forEach(o => o.classList.toggle('selected', editData.genres.includes(o.dataset.value)));
     document.getElementById('editGenrePrivateBtn').classList.toggle('selected', editData.genres.includes('비밀'));
     
@@ -1373,7 +1419,6 @@
   
   function editSelectOption(el, key, scopeId) {
     if (key === 'mbti') {
-      // MBTI: 그리드 + 별도 비밀 버튼 모두 해제 후 선택
       document.querySelectorAll('#editMbtiOpts .option').forEach(s => s.classList.remove('selected'));
       document.getElementById('editMbtiPrivate').classList.remove('selected');
       el.classList.add('selected');
@@ -1498,7 +1543,6 @@
     }
   }
   
-  // ============ FEED ============
   function switchTab(tab) {
     document.querySelectorAll('.feed-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + tab));
@@ -1573,7 +1617,7 @@
       </div>
     `;
   }
-  
+
   function getRequestBetween(meId, otherId) {
     return requestsCache.find(r => (r.fromId === meId && r.toId === otherId) || (r.fromId === otherId && r.toId === meId));
   }
@@ -1650,7 +1694,7 @@
   async function confirmSendRequest() {
     if (!pendingRequestTargetId) return;
     const message = document.getElementById('requestMessage').value.trim();
-    await fetchRequests(); // 최신 상태 확인
+    await fetchRequests();
     const existing = getRequestBetween(currentUser.id, pendingRequestTargetId);
     if (existing) {
       showToast('이미 요청이 진행 중이거나 처리된 동행입니다.');
@@ -1661,10 +1705,8 @@
     try {
       await insertRequest({
         id: 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
-        fromId: currentUser.id,
-        toId: pendingRequestTargetId,
-        message: message,
-        status: 'pending'
+        fromId: currentUser.id, toId: pendingRequestTargetId,
+        message: message, status: 'pending'
       });
       await fetchRequests();
       hideLoading();
@@ -1805,8 +1847,7 @@
       showToast('삭제에 실패했어요.');
     }
   }
-  
-  // ============ ADMIN ============
+
   function openAdminLogin() {
     document.getElementById('adminOverlay').classList.add('active');
     if (sessionStorage.getItem(SESSION_ADMIN_KEY) === 'ok') {
@@ -1939,7 +1980,6 @@
     }
   });
   
-  // ============ INIT ============
   (async function init() {
     if (!isConfigured) return;
     await restoreSession();
