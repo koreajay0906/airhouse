@@ -266,6 +266,20 @@
   .admin-btn:hover { border-color: var(--ink); background: var(--bg-soft); }
   .admin-btn.danger:hover { border-color: var(--error); color: var(--error); }
   .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 40px; }
+  .event-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 24px; }
+  .event-stat-card { background: var(--paper); padding: 16px 18px; }
+  .event-stat-name { font-family: var(--sans); font-size: 12px; color: var(--ink-soft); margin-bottom: 6px; line-height: 1.4; }
+  .event-stat-count { font-family: var(--serif-ko); font-size: 22px; font-weight: 500; color: var(--ink); }
+  .event-stat-count .recent { font-family: var(--serif-en); font-size: 11px; color: var(--moss); margin-left: 6px; letter-spacing: 0.05em; }
+  .event-funnel { background: var(--paper); border: 1px solid var(--line); padding: 20px; margin-bottom: 24px; border-radius: 2px; }
+  .event-funnel-title { font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; margin-bottom: 14px; }
+  .funnel-row { display: flex; align-items: center; gap: 14px; padding: 8px 0; border-bottom: 1px dashed var(--line-soft); }
+  .funnel-row:last-child { border-bottom: none; }
+  .funnel-label { flex: 1; font-size: 13px; color: var(--ink); }
+  .funnel-bar-wrap { flex: 2; height: 6px; background: var(--bg-soft); border-radius: 3px; overflow: hidden; min-width: 60px; }
+  .funnel-bar { height: 100%; background: var(--moss); transition: width 0.4s ease; }
+  .funnel-count { font-family: var(--serif-en); font-size: 13px; color: var(--ink-soft); min-width: 60px; text-align: right; letter-spacing: 0.05em; }
+  .funnel-rate { font-family: var(--serif-en); font-size: 11px; color: var(--moss); min-width: 50px; text-align: right; }
   .stat { background: var(--paper); padding: 24px 20px; }
   .stat-label { font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase; margin-bottom: 10px; }
   .stat-value { font-family: var(--serif-ko); font-size: 30px; font-weight: 500; line-height: 1; }
@@ -981,12 +995,15 @@
       <div class="admin-title-group"><div class="admin-eyebrow">Companion Matching · Admin</div><h2>관리자 대시보드</h2></div>
       <div class="admin-actions">
         <button class="admin-btn" onclick="refreshAdminData()">새로고침</button>
-        <button class="admin-btn" onclick="exportCSV()">CSV 내보내기</button>
+        <button class="admin-btn" onclick="exportCSV()">프로필 CSV</button>
+        <button class="admin-btn" onclick="exportEventsCSV()">이벤트 CSV</button>
         <button class="admin-btn danger" onclick="clearAll()">전체 삭제</button>
         <button class="admin-btn" onclick="adminLogout()">로그아웃</button>
       </div>
     </div>
     <div class="stats-grid" id="adminStatsGrid"></div>
+    <h3 class="admin-section-title">활동 통계 <span style="font-family: var(--serif-en); font-size: 12px; color: var(--ink-mute); letter-spacing: 0.1em; margin-left: 8px;">EVENTS</span></h3>
+    <div id="adminEventStats" style="margin-bottom: 24px;"></div>
     <h3 class="admin-section-title">전체 프로필</h3>
     <div class="admin-table" id="adminProfileList"></div>
     <h3 class="admin-section-title">동행 요청 내역</h3>
@@ -1087,6 +1104,15 @@
     return requestsCache;
   }
   
+  let eventsCache = [];
+  async function fetchEvents() {
+    if (!sb) return [];
+    const { data, error } = await sb.from('events').select('*').order('created_at', { ascending: false }).limit(5000);
+    if (error) { console.error('fetchEvents:', error); return []; }
+    eventsCache = data || [];
+    return eventsCache;
+  }
+  
   async function findProfileByPhone(phone) {
     if (!sb) return null;
     const cleaned = normalizePhone(phone);
@@ -1144,11 +1170,24 @@
     document.getElementById('loadingText').textContent = text || 'Loading';
     document.getElementById('loadingOverlay').classList.add('active');
   }
-  // Vercel Analytics 커스텀 이벤트 추적 (실패해도 앱에 영향 없도록)
+  // 커스텀 이벤트 추적 (Supabase events 테이블에 기록)
+  // 비동기 fire-and-forget — 실패해도 앱에 영향 없도록
   function track(eventName, props) {
+    if (!sb) return;
     try {
-      if (window.va) window.va('event', { name: eventName, data: props || {} });
+      sb.from('events').insert({
+        name: eventName,
+        data: props || {},
+        user_id: currentUser ? currentUser.id : null,
+        is_guest: !!isGuest
+      }).then(({ error }) => {
+        if (error) console.warn('track failed:', error.message);
+      });
     } catch (e) { /* ignore */ }
+  }
+  // 페이지 진입 시 자동 page_view 이벤트
+  function trackPageView(page) {
+    track('page_view', { page: page });
   }
   function hideLoading() {
     document.getElementById('loadingOverlay').classList.remove('active');
@@ -1210,6 +1249,7 @@
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
     window.scrollTo({ top: 0, behavior: 'instant' });
+    trackPageView(page);
     if (page === 'register') resetRegisterForm();
     if (page === 'login') {
       document.getElementById('loginPhone').value = '';
@@ -1232,6 +1272,7 @@
     currentUser = null;
     applyGuestUI();
     track('guest_mode_enter');
+    trackPageView('feed_guest');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-feed').classList.add('active');
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1268,6 +1309,7 @@
     document.getElementById('page-feed').classList.add('active');
     window.scrollTo({ top: 0, behavior: 'instant' });
     updateTopbar();
+    trackPageView('feed');
     await renderFeed();
   }
   function goToSuccess(title, desc) {
@@ -2219,9 +2261,125 @@
   
   async function refreshAdminData() {
     showLoading('Loading');
-    await Promise.all([fetchProfiles(), fetchRequests()]);
+    await Promise.all([fetchProfiles(), fetchRequests(), fetchEvents()]);
     hideLoading();
     renderAdminDash();
+  }
+  
+  function renderEventStats() {
+    const container = document.getElementById('adminEventStats');
+    if (!eventsCache || eventsCache.length === 0) {
+      container.innerHTML = '<div class="empty-state" style="padding: 40px 20px;"><div class="empty-state-desc">아직 이벤트 데이터가 없습니다.</div></div>';
+      return;
+    }
+    
+    // 이벤트별 개수 + 최근 24시간 카운트
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const counts = {};
+    const recentCounts = {};
+    for (const ev of eventsCache) {
+      counts[ev.name] = (counts[ev.name] || 0) + 1;
+      if (new Date(ev.created_at).getTime() >= oneDayAgo) {
+        recentCounts[ev.name] = (recentCounts[ev.name] || 0) + 1;
+      }
+    }
+    
+    // 전환 퍼널 계산 (홈→등록 / 둘러보기→카드클릭→등록)
+    const homeView = counts['page_view'] ? eventsCache.filter(e => e.name === 'page_view' && e.data && e.data.page === 'home').length : 0;
+    const homeRegClick = counts['home_register_click'] || 0;
+    const homeBrowseClick = counts['home_browse_click'] || 0;
+    const guestEnter = counts['guest_mode_enter'] || 0;
+    const guestCardClick = counts['guest_card_click'] || 0;
+    const profileRegSuccess = counts['profile_register_success'] || 0;
+    const requestsSent = counts['companion_request_sent'] || 0;
+    const requestAccepted = eventsCache.filter(e => e.name === 'companion_request_response' && e.data && e.data.status === 'accepted').length;
+    
+    const pct = (a, b) => b > 0 ? Math.round((a / b) * 100) + '%' : '—';
+    const bar = (a, b) => b > 0 ? Math.min(100, (a / b) * 100) : 0;
+    
+    // 주요 이벤트 카드 (페이지뷰 + 전환 핵심 지표)
+    const cardEvents = [
+      ['page_view', '페이지 진입'],
+      ['home_browse_click', '둘러보기 클릭'],
+      ['guest_mode_enter', '둘러보기 진입'],
+      ['guest_card_click', '카드 클릭 (게스트)'],
+      ['home_register_click', '등록 버튼 클릭'],
+      ['profile_register_success', '프로필 등록 완료'],
+      ['user_login_success', '로그인 성공'],
+      ['companion_request_sent', '동행 요청 전송'],
+      ['companion_request_response', '동행 응답 (전체)']
+    ];
+    
+    const cardsHtml = cardEvents.map(([name, label]) => {
+      const total = counts[name] || 0;
+      const recent = recentCounts[name] || 0;
+      return `<div class="event-stat-card">
+        <div class="event-stat-name">${label}</div>
+        <div class="event-stat-count">${total}${recent > 0 ? `<span class="recent">+${recent} (24h)</span>` : ''}</div>
+      </div>`;
+    }).join('');
+    
+    // 전환 퍼널
+    const funnelHtml = `
+      <div class="event-funnel">
+        <div class="event-funnel-title">전환 퍼널 (홈 진입 기준)</div>
+        <div class="funnel-row">
+          <div class="funnel-label">홈 페이지 진입</div>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" style="width: 100%;"></div></div>
+          <div class="funnel-count">${homeView}</div>
+          <div class="funnel-rate">100%</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">→ 둘러보기 클릭</div>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" style="width: ${bar(homeBrowseClick, homeView)}%;"></div></div>
+          <div class="funnel-count">${homeBrowseClick}</div>
+          <div class="funnel-rate">${pct(homeBrowseClick, homeView)}</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">→ 등록 버튼 클릭</div>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" style="width: ${bar(homeRegClick, homeView)}%;"></div></div>
+          <div class="funnel-count">${homeRegClick}</div>
+          <div class="funnel-rate">${pct(homeRegClick, homeView)}</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">→ 프로필 등록 완료</div>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" style="width: ${bar(profileRegSuccess, homeView)}%;"></div></div>
+          <div class="funnel-count">${profileRegSuccess}</div>
+          <div class="funnel-rate">${pct(profileRegSuccess, homeView)}</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">→ 동행 요청 전송</div>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" style="width: ${bar(requestsSent, homeView)}%;"></div></div>
+          <div class="funnel-count">${requestsSent}</div>
+          <div class="funnel-rate">${pct(requestsSent, homeView)}</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">→ 요청 수락 (성사)</div>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" style="width: ${bar(requestAccepted, homeView)}%;"></div></div>
+          <div class="funnel-count">${requestAccepted}</div>
+          <div class="funnel-rate">${pct(requestAccepted, homeView)}</div>
+        </div>
+      </div>
+      ${guestEnter > 0 ? `
+      <div class="event-funnel">
+        <div class="event-funnel-title">둘러보기 전환 (게스트 진입 기준)</div>
+        <div class="funnel-row">
+          <div class="funnel-label">둘러보기 진입</div>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" style="width: 100%;"></div></div>
+          <div class="funnel-count">${guestEnter}</div>
+          <div class="funnel-rate">100%</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">→ 카드 클릭</div>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" style="width: ${bar(guestCardClick, guestEnter)}%;"></div></div>
+          <div class="funnel-count">${guestCardClick}</div>
+          <div class="funnel-rate">${pct(guestCardClick, guestEnter)}</div>
+        </div>
+      </div>
+      ` : ''}
+    `;
+    
+    container.innerHTML = `<div class="event-stats-grid">${cardsHtml}</div>${funnelHtml}`;
   }
   
   function renderAdminDash() {
@@ -2235,6 +2393,8 @@
       <div class="stat"><div class="stat-label">May 24 Sun</div><div class="stat-value">${countByDay('24일')}</div></div>
       <div class="stat"><div class="stat-label">May 25 Mon</div><div class="stat-value">${countByDay('25일')}</div></div>
     `;
+    
+    renderEventStats();
     
     const profileList = document.getElementById('adminProfileList');
     if (profilesCache.length === 0) {
@@ -2308,6 +2468,26 @@
     URL.revokeObjectURL(url);
   }
   
+  function exportEventsCSV() {
+    if (!eventsCache || eventsCache.length === 0) { showToast('내보낼 이벤트가 없습니다.'); return; }
+    const headers = ['시각', '이벤트명', '데이터(JSON)', '사용자ID', '게스트여부'];
+    const rows = eventsCache.map(ev => [
+      new Date(ev.created_at).toLocaleString('ko-KR'),
+      ev.name || '',
+      JSON.stringify(ev.data || {}),
+      ev.user_id || '',
+      ev.is_guest ? 'Y' : 'N'
+    ]);
+    const csv = '\ufeff' + [headers, ...rows].map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `airhouse_events_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (document.getElementById('requestModal').classList.contains('active')) closeRequestModal();
@@ -2321,7 +2501,11 @@
   (async function init() {
     if (!isConfigured) return;
     await restoreSession();
-    if (currentUser) await goToFeed();
+    if (currentUser) {
+      await goToFeed();
+    } else {
+      trackPageView('home');
+    }
   })();
 </script>
 </body>
