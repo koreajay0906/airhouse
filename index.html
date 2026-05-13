@@ -374,7 +374,7 @@
 <div class="topbar">
   <div class="brand" onclick="handleBrandClick()">
     <span class="brand-full">HANDYBUS <span class="dot"></span> THE AIR HOUSE</span>
-    <span class="brand-short" style="display:none;">THE AIR HOUSE</span>
+    <span class="brand-short" style="display:none;">HANDYBUS</span>
   </div>
   <div class="topbar-right">
     <span class="topbar-meta" id="topbarMeta">2026.05.23 — 05.25</span>
@@ -839,7 +839,7 @@
   <div class="modal-content">
     <div class="modal-eyebrow">Send Companion Request</div>
     <h3 class="modal-title" id="requestModalTitle">동행 요청 보내기</h3>
-    <p style="font-size: 14px; color: var(--ink-soft); margin-bottom: 16px; line-height: 1.7;">메시지를 함께 보내면 수락 확률이 높아져요. (선택)</p>
+    <p style="font-size: 14px; color: var(--ink-soft); margin-bottom: 16px; line-height: 1.7;">메시지를 함께 보내면 수락 확률이 높아져요. (선택)<br><span style="color: var(--moss); font-size: 13px;">상대방이 동행을 수락하면 연락처를 확인할 수 있어요.</span></p>
     <textarea class="textarea" id="requestMessage" placeholder="예: 안녕하세요! 23일에 같이 가실 분 찾고 있었어요." style="min-height: 120px;" oninput="enforceMaxLength(this, 200)" oncompositionend="enforceMaxLength(this, 200)"></textarea>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeRequestModal()" style="flex: 1;">취소</button>
