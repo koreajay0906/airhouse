@@ -190,6 +190,27 @@
   .filter-chip:hover { border-color: var(--accent-soft); }
   .filter-chip.active { background: var(--accent); color: var(--paper); border-color: var(--accent); }
   .profile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .rec-card-wrap { margin-bottom: 28px; }
+  .rec-card { background: linear-gradient(135deg, var(--paper) 0%, var(--bg-soft) 100%); border: 1px solid var(--moss); border-radius: 4px; padding: 28px; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden; }
+  .rec-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(90,107,74,0.12); }
+  .rec-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--moss); }
+  .rec-card-eyebrow { font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.3em; color: var(--moss); text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .rec-card-eyebrow::before { content: '✦'; font-size: 14px; }
+  .rec-card-body { display: flex; gap: 18px; align-items: flex-start; }
+  .rec-card-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--accent); color: var(--paper); display: flex; align-items: center; justify-content: center; font-family: var(--serif-ko); font-weight: 500; font-size: 28px; flex-shrink: 0; overflow: hidden; border: 2px solid var(--moss); }
+  .rec-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .rec-card-info { flex: 1; min-width: 0; }
+  .rec-card-name { font-family: var(--serif-ko); font-size: 22px; font-weight: 500; margin-bottom: 8px; line-height: 1.2; }
+  .rec-card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+  .rec-card-intro { font-size: 14px; color: var(--ink-soft); line-height: 1.6; padding-top: 12px; margin-top: 4px; border-top: 1px dashed var(--line-soft); font-style: italic; }
+  .rec-card-cta { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; font-family: var(--serif-en); font-size: 12px; letter-spacing: 0.15em; color: var(--moss); text-transform: uppercase; }
+  @media (max-width: 640px) {
+    .rec-card { padding: 20px; }
+    .rec-card-body { gap: 14px; }
+    .rec-card-avatar { width: 64px; height: 64px; font-size: 22px; }
+    .rec-card-name { font-size: 18px; }
+    .rec-card-intro { font-size: 13px; }
+  }
   .profile-card { background: var(--paper); border: 1px solid var(--line); border-radius: 2px; padding: 24px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 14px; }
   .profile-card:hover { border-color: var(--accent-soft); transform: translateY(-2px); }
   .profile-card-header { display: flex; align-items: center; gap: 12px; }
@@ -915,6 +936,7 @@
       <button class="feed-tab guest-hide" data-tab="me" onclick="switchTab('me')">내 프로필</button>
     </div>
     <div class="tab-content active" id="tab-discover">
+      <div id="recommendCard"></div>
       <div class="filter-stack">
         <div class="filter-bar-feed">
           <span class="filter-label">By day</span>
@@ -1878,7 +1900,119 @@
     document.getElementById('filterSummary').innerHTML = hasFilter ? `<strong>${parts.join(' · ')}</strong>` : '';
   }
   
+  // ============================================================
+  // 동행 추천 (규칙 기반)
+  // ============================================================
+  // 두 사람의 매칭 점수 계산
+  function calcMatchScore(me, other) {
+    let score = 0;
+    
+    // 필수: 참가일이 하나라도 겹쳐야 함
+    const myDays = me.days || [];
+    const theirDays = other.days || [];
+    const sharedDays = myDays.filter(d => theirDays.includes(d));
+    if (sharedDays.length === 0) return null;
+    score += sharedDays.length * 4; // 겹치는 날 1일당 +4
+    
+    // 동행 목적 겹침
+    const myReason = normalizeReason(me.reason);
+    const theirReason = normalizeReason(other.reason);
+    const sharedReasons = myReason.filter(r => theirReason.includes(r));
+    score += sharedReasons.length * 2;
+    
+    // 음악 장르 겹침
+    const myGenres = (me.genres || []).filter(g => g !== '비밀');
+    const theirGenres = (other.genres || []).filter(g => g !== '비밀');
+    const sharedGenres = myGenres.filter(g => theirGenres.includes(g));
+    score += sharedGenres.length * 1;
+    
+    // 같은 나이대
+    if (me.age && other.age && me.age === other.age && me.age !== '비밀') {
+      score += 2;
+    }
+    
+    // 같은 MBTI
+    if (me.mbti && other.mbti && me.mbti === other.mbti && me.mbti !== '비밀') {
+      score += 1;
+    }
+    
+    return { score };
+  }
+  
+  // 추천 1명 선정
+  function pickRecommendation() {
+    if (isGuest || !currentUser) return null;
+    
+    // 제외 대상: 본인 + 이미 요청 주고받은 사람 + 성사된 동행자
+    const excludeIds = new Set([currentUser.id]);
+    for (const r of requestsCache) {
+      if (r.fromId === currentUser.id) excludeIds.add(r.toId);
+      if (r.toId === currentUser.id) excludeIds.add(r.fromId);
+    }
+    
+    // 후보군에서 점수 계산
+    const candidates = [];
+    for (const p of profilesCache) {
+      if (excludeIds.has(p.id)) continue;
+      const result = calcMatchScore(currentUser, p);
+      if (result === null) continue; // 같은 날 없음
+      candidates.push({ profile: p, ...result });
+    }
+    if (candidates.length === 0) return null;
+    
+    // 최고점 정렬, 동점이면 무작위
+    candidates.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return Math.random() - 0.5;
+    });
+    return candidates[0];
+  }
+  
+  function renderRecommendCard() {
+    const container = document.getElementById('recommendCard');
+    if (!container) return;
+    
+    // 게스트 모드면 숨김
+    if (isGuest || !currentUser) {
+      container.innerHTML = '';
+      return;
+    }
+    
+    const rec = pickRecommendation();
+    if (!rec) {
+      container.innerHTML = '';
+      return;
+    }
+    
+    const p = rec.profile;
+    const avatar = p.photo
+      ? `<div class="rec-card-avatar"><img src="${p.photo}" alt=""></div>`
+      : `<div class="rec-card-avatar">${escapeHtml((p.nickname || '·')[0])}</div>`;
+    const tags = [];
+    if (p.gender) tags.push(`<span class="tag tag-gender">${escapeHtml(p.gender)}</span>`);
+    if (p.age) tags.push(`<span class="tag tag-age">${escapeHtml(p.age)}</span>`);
+    if (p.mbti && p.mbti !== '비밀') tags.push(`<span class="tag tag-lifestyle">${escapeHtml(p.mbti)}</span>`);
+    
+    container.innerHTML = `
+      <div class="rec-card-wrap">
+        <div class="rec-card" onclick="openProfileModal('${p.id}')">
+          <div class="rec-card-eyebrow">오늘의 추천 동행</div>
+          <div class="rec-card-body">
+            ${avatar}
+            <div class="rec-card-info">
+              <div class="rec-card-name">${escapeHtml(p.nickname)}</div>
+              <div class="rec-card-tags">${tags.join('')}</div>
+              ${p.intro ? `<div class="rec-card-intro">"${escapeHtml(p.intro)}"</div>` : ''}
+              <div class="rec-card-cta">프로필 자세히 보기 →</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
   function renderDiscover() {
+    renderRecommendCard();
     // 게스트 모드일 때는 currentUser가 없으니 본인 제외 필터 생략
     let others = isGuest ? profilesCache.slice() : profilesCache.filter(p => p.id !== currentUser.id);
     // day 필터 (단일)
